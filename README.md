@@ -1,4 +1,8 @@
-# Lumissary — *The Master and His Emitter*
+# Lumissary — _The Master and His Emitter_
+
+> **Status: in progress.** The design is complete and I'm assembling the hardware now. I've calibrated UWB ranging between two boards and get usable readings to within about an inch. The firmware (Kuramoto coupling, LED rendering, WiFi phase sync) isn't written yet and isn't running on the boards. The sections below describe the intended design, not a working system.
+>
+> Lumissary is my first foray into embedded systems and electronics, made with the help of Claude.
 
 Two 3D-printed brain hemispheres that light up from inside, and that sense each other.
 
@@ -12,15 +16,15 @@ This document covers the concept and the full technical design as of the end of 
 
 ## 1. The Idea
 
-This project comes straight from **Iain McGilchrist's *The Master and His Emissary***. While I was reading it, the book's argument about the two hemispheres of the brain kept turning into a physical image of this build.
+This project comes straight from **Iain McGilchrist's _The Master and His Emissary_**. While I was reading it, the book's argument about the two hemispheres of the brain kept turning into a physical image of this build.
 
 McGilchrist describes the left hemisphere as narrow and analytical, breaking the world into details. He describes the right as broad and integrative, seeing things whole and in relation. Lumissary builds that difference into both the hardware and the behavior of each hemisphere:
 
-| | Left hemisphere | Right hemisphere |
-|---|---|---|
-| **Character** | Analytical, focused on parts | Integrative, focused on relations |
-| **Construction** | Bare LED strips: each LED stays a distinct, separate point | Diffused light: a clear tube or sleeve blends neighboring LEDs together *(design intent, not yet sourced)* |
-| **Firing pattern** | Rigid, step by step: one LED or one color at a time | Smooth and continuous: colors blend from one state to the next |
+|                    | Left hemisphere                                            | Right hemisphere                                                                                           |
+| ------------------ | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **Character**      | Analytical, focused on parts                               | Integrative, focused on relations                                                                          |
+| **Construction**   | Bare LED strips: each LED stays a distinct, separate point | Diffused light: a clear tube or sleeve blends neighboring LEDs together _(design intent, not yet sourced)_ |
+| **Firing pattern** | Rigid, step by step: one LED or one color at a time        | Smooth and continuous: colors blend from one state to the next                                             |
 
 What connects them is a **coupled-oscillator model** (Kuramoto) driven by physical distance. The synchronization is the point of the piece, not a technical add-on: it turns the relationship between the two hemispheres, separate or unified, into something you can see. That tension is what the book is about.
 
@@ -32,7 +36,7 @@ What connects them is a **coupled-oscillator model** (Kuramoto) driven by physic
 - **Hemispheres pulled apart:** the shared tempo loosens. Each one drifts toward its own natural frequency, and the phase offset between them visibly grows. The left's steps and the right's flows fall out of step.
 - **Somewhere in between:** the coupling weakens gradually with distance, so the pair pass through a range of partial sync. They are never fully locked and never fully free.
 
-Distance controls *how tightly* the two rhythms are locked. Each hemisphere's own *character* controls how it expresses that rhythm.
+Distance controls _how tightly_ the two rhythms are locked. Each hemisphere's own _character_ controls how it expresses that rhythm.
 
 ---
 
@@ -53,9 +57,10 @@ dθ₂/dt = ω₂ + K(d)·sin(θ₁ − θ₂)
 - **WiFi carries phase:** each hemisphere broadcasts its current θ to the other at a regular interval, using low-latency UDP or ESP-NOW-style messaging.
 - **Coupling falls off with distance:** `K(d)` is high when the hemispheres are close (phases pull together quickly) and falls as they move apart (phases drift). Either `K(d) = K₀ / d` or `K₀·e^(−d/λ)` is a reasonable starting point. The exact curve is a tuning parameter, not a fixed formula.
 
-**Rendering:** both hemispheres use the *same* θ relationship, and only the rendering differs. The left maps phase to a rigid step function. The right maps it to a continuous, interpolated blend, and the diffusion tubing adds physical softening on top.
+**Rendering:** both hemispheres use the _same_ θ relationship, and only the rendering differs. The left maps phase to a rigid step function. The right maps it to a continuous, interpolated blend, and the diffusion tubing adds physical softening on top.
 
 **Firmware notes:**
+
 - Everything runs in ESP32 firmware. No hardware is needed beyond what's listed below.
 - ω₁ and ω₂ can be equal, so sync depends purely on distance. They can also differ slightly, which gives each hemisphere a baseline "personality" and lets distance control how much of it shows through.
 - The UWB ranging rate and the WiFi broadcast rate both need to be faster than the visible pulse cycle, or the sync won't look smooth.
@@ -68,14 +73,14 @@ dθ₂/dt = ω₂ + K(d)·sin(θ₁ − θ₂)
 
 ### At a Glance
 
-| Spec | Value |
-|---|---|
-| LED strips | 3× Adafruit DotStar (SK9822 driver), 144 LED/m, cut to ~7in each (~26 LEDs/strip) |
-| Controller | ESP32 UWB module (Makerfabs): WiFi + DW1000 UWB radio |
-| Level shifter | 1× SN74HCT245 (3.3V logic in → 5V logic out) |
-| Board | Single consolidated protoboard, double-sided/plated-through-hole, 12x18cm |
-| Power | 2S LiPo (7.4V), split into two independently regulated 5V rails |
-| Runtime target | ~2 hours at 80%-capped brightness |
+| Spec           | Value                                                                             |
+| -------------- | --------------------------------------------------------------------------------- |
+| LED strips     | 3× Adafruit DotStar (SK9822 driver), 144 LED/m, cut to ~7in each (~26 LEDs/strip) |
+| Controller     | ESP32 UWB module (Makerfabs): WiFi + DW1000 UWB radio                             |
+| Level shifter  | 1× SN74HCT245 (3.3V logic in → 5V logic out)                                      |
+| Board          | Single consolidated protoboard, double-sided/plated-through-hole, 12x18cm         |
+| Power          | 2S LiPo (7.4V), split into two independently regulated 5V rails                   |
+| Runtime target | ~2 hours at 80%-capped brightness                                                 |
 
 ### Power Architecture
 
@@ -87,6 +92,7 @@ The design uses **two electrically separate 5V rails that share one battery and 
 **Why two rails:** switching regulators produce ripple, and LED current spikes whenever brightness or patterns change. A shared rail would couple that noise directly into the WiFi/UWB radio's supply. The ranging that drives the whole piece depends on that radio. Separate rails with separate fuses mean a fault on one side can't affect the other.
 
 **Sizing:**
+
 - 3 strips × 26 LEDs × 60mA × 0.8 brightness cap ≈ **3.75A worst case** (LED bus)
 - ESP32 WiFi/UWB transmit bursts ≈ **1-2A** (isolated rail)
 - Realistic average (30% duty cycle) ≈ 6.6W total → **~17-18Wh battery target** → 2000mAh 2S pack, ~1h40-2h runtime
@@ -96,7 +102,7 @@ The design uses **two electrically separate 5V rails that share one battery and 
 - **Pin order P-G-D-C** (not flanking or interleaved): power and ground sit next to each other, so Data and Clock run straight from JST to chip to ESP32 with no forced wire crossings.
 - **Front/back split:** the whole +5V network (P pins, chip VCC, ESP32 power) is on the front face. Everything else (GND, Data, Clock, chip body, ESP32 body) is on the back. This removes the need for insulated hop wires.
 - **Near-edge / far-edge placement:** the JSTs, level shifter, and power circuitry sit at one edge. The ESP32 and its antenna sit at the opposite edge, which gives as much RF separation as the board allows.
-- **220Ω series resistors** on all 6 Data/Clock lines, on the level-shifter *output* side. They damp high-frequency harmonics from fast logic edges, reducing interference with the nearby UWB receiver.
+- **220Ω series resistors** on all 6 Data/Clock lines, on the level-shifter _output_ side. They damp high-frequency harmonics from fast logic edges, reducing interference with the nearby UWB receiver.
 - **UBEC/BEC modules are external and inline,** spliced into the wiring like the fuse holder rather than soldered to the board.
 
 ### RF / Antenna
@@ -139,15 +145,18 @@ See `final_shopping_list.md` for the complete, verified-in-stock parts list. It 
 ## 6. Status & Open Items
 
 **Hardware**
+
 - [ ] Confirm the exact antenna location and keep-out dimension on the physical Makerfabs board
 - [ ] Confirm the ESP32 board has a usable 5V/VIN input pin (not just USB power)
 - [ ] Verify the wire gauge fits in the XT30 solder cups (18AWG trunk wire may be snug)
 - [ ] Confirm the strip wire-to-pin mapping (which color carries which signal) once the strips arrive, before final soldering
 
 **Sync & firmware**
+
 - [ ] Prototype the Kuramoto coupling function `K(d)` in software before connecting live UWB data
 - [ ] Test UWB ranging accuracy and WiFi signal at actual enclosure spacing
 - [ ] Tune the UWB ranging rate and WiFi phase-broadcast rate against the visible LED pulse cycle
 
 **Creative**
+
 - [ ] Source and choose a material for the right hemisphere's diffusion tubing (design intent only, not yet on the shopping list)
