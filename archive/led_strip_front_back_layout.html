@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Front / Back Protoboard — No-Arch Routing</title>
+<style>
+  :root {
+    --bg: #10131a;
+    --panel: #1a1e28;
+    --board: #d8c39c;
+    --board-edge: #8a7550;
+    --pad: #c48a4f;
+    --pad-dark: #8a5a2c;
+    --hole: #2a1d10;
+    --solder: #d9dde3;
+    --solder-shadow: #9aa0aa;
+    --w-v5: #e0393f;
+    --w-gnd: #262a30;
+    --w-data: #2f8fd6;
+    --w-clk: #f2a33d;
+    --text: #e8ecf4;
+    --muted: #98a2b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Roboto, -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+  h1 { font-size: 20px; font-weight: 600; margin: 0; text-align: center; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-top: -8px; text-align: center; max-width: 700px; }
+  .board-wrap {
+    background: var(--panel);
+    border: 1px solid #2a3040;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  svg { display: block; }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    justify-content: center;
+    background: var(--panel);
+    border: 1px solid #2a3040;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 13px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .swatch { width: 24px; height: 6px; border-radius: 3px; }
+  .note { max-width: 700px; font-size: 12.5px; color: var(--muted); line-height: 1.55; text-align: center; }
+  .note b { color: var(--text); }
+</style>
+</head>
+<body>
+
+  <h1>Avoiding the Arch: +5V Wired on the Opposite Face</h1>
+  <div class="subtitle">Instead of arching the red +5V jumpers over the black GND bus, put each network on its own face of the board entirely. They never occupy the same plane, so there's nothing to physically clear.</div>
+
+  <div class="board-wrap">
+    <svg viewBox="0 0 900 760" width="900" height="760">
+
+      <defs>
+        <radialGradient id="solderGlint" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="45%" stop-color="var(--solder)"/>
+          <stop offset="100%" stop-color="var(--solder-shadow)"/>
+        </radialGradient>
+        <pattern id="perf" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="4.4" fill="var(--pad)" stroke="var(--pad-dark)" stroke-width="0.8"/>
+          <circle cx="11" cy="11" r="1.6" fill="var(--hole)"/>
+        </pattern>
+        <pattern id="perfBack" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="4.4" fill="#c9b48a" stroke="var(--pad-dark)" stroke-width="0.8"/>
+          <circle cx="11" cy="11" r="1.6" fill="var(--hole)"/>
+        </pattern>
+      </defs>
+
+      <!-- ============ FRONT PANEL ============ -->
+      <text x="450" y="24" text-anchor="middle" font-size="14" font-weight="700" fill="var(--w-v5)">FRONT — component side (+5V network only)</text>
+
+      <rect x="20" y="36" width="860" height="280" rx="8" fill="var(--board)" stroke="var(--board-edge)" stroke-width="2"/>
+      <rect x="34" y="50" width="832" height="252" fill="url(#perf)"/>
+
+      <!-- +5V bus -->
+      <line x1="100" y1="96" x2="860" y2="96" stroke="var(--w-v5)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="100" y1="96" x2="860" y2="96" stroke="#ff8a8a" stroke-width="1.2" opacity="0.6"/>
+      <text x="865" y="100" font-size="11" fill="var(--w-v5)" font-weight="700">+5V BUS</text>
+      <circle cx="100" cy="96" r="6" fill="url(#solderGlint)"/>
+
+      <!-- PSU +5V in -->
+      <rect x="34" y="76" width="60" height="36" rx="4" fill="#241a10" stroke="#4a3a24"/>
+      <text x="64" y="98" text-anchor="middle" font-size="10" fill="#ff9a9a" font-weight="700">PSU +5V</text>
+
+      <!-- P jumpers: straight, no arch, nothing else occupies this face at those columns -->
+      <g stroke="var(--w-v5)" stroke-width="5" stroke-linecap="round">
+        <line x1="170" y1="96" x2="170" y2="230"/>
+        <line x1="420" y1="96" x2="420" y2="230"/>
+        <line x1="670" y1="96" x2="670" y2="230"/>
+      </g>
+      <g fill="url(#solderGlint)">
+        <circle cx="170" cy="96" r="5.5"/><circle cx="170" cy="230" r="5.5"/>
+        <circle cx="420" cy="96" r="5.5"/><circle cx="420" cy="230" r="5.5"/>
+        <circle cx="670" cy="96" r="5.5"/><circle cx="670" cy="230" r="5.5"/>
+      </g>
+
+      <!-- connector body outlines, sitting on the front, spanning all 4 hole columns per strip -->
+      <g fill="#2c2c2e" stroke="#111" stroke-width="1.5" opacity="0.9">
+        <rect x="155" y="218" width="120" height="26" rx="4"/>
+        <rect x="405" y="218" width="120" height="26" rx="4"/>
+        <rect x="655" y="218" width="120" height="26" rx="4"/>
+      </g>
+      <g font-size="10.5" fill="#3a2c14" text-anchor="middle" font-weight="700">
+        <text x="215" y="214">JST-1 body</text>
+        <text x="465" y="214">JST-2 body</text>
+        <text x="715" y="214">JST-3 body</text>
+      </g>
+
+      <!-- dashed via markers for G/D/C on front — wire lives on back, just note the through-hole here -->
+      <g stroke="#8a5a2c" stroke-width="1.3" stroke-dasharray="2,2" fill="none">
+        <circle cx="200" cy="231" r="6"/>
+        <circle cx="230" cy="231" r="6"/>
+        <circle cx="260" cy="231" r="6"/>
+        <circle cx="450" cy="231" r="6"/>
+        <circle cx="480" cy="231" r="6"/>
+        <circle cx="510" cy="231" r="6"/>
+        <circle cx="700" cy="231" r="6"/>
+        <circle cx="730" cy="231" r="6"/>
+        <circle cx="760" cy="231" r="6"/>
+      </g>
+      <text x="450" y="300" text-anchor="middle" font-size="10.5" fill="#5a4a30" font-style="italic">
+        Dashed circles = G / D / C pins pass straight through the board here — their wires are all soldered on the BACK, nothing routed for them on this face
+      </text>
+
+      <!-- ============ SEPARATOR / BOARD THICKNESS CALLOUT ============ -->
+      <g transform="translate(360,318)">
+        <rect x="0" y="0" width="180" height="46" rx="6" fill="#20242e" stroke="#2a3040"/>
+        <text x="90" y="18" text-anchor="middle" font-size="10" fill="var(--text)" font-weight="700">~1.6mm board thickness</text>
+        <text x="90" y="32" text-anchor="middle" font-size="9" fill="var(--muted)">two separate physical planes</text>
+        <line x1="10" y1="40" x2="10" y2="6" stroke="var(--muted)" stroke-width="1"/>
+        <line x1="170" y1="40" x2="170" y2="6" stroke="var(--muted)" stroke-width="1"/>
+      </g>
+
+      <!-- ============ BACK PANEL ============ -->
+      <text x="450" y="392" text-anchor="middle" font-size="14" font-weight="700" fill="#c9ced8">BACK — solder side (GND + Data + Clock)</text>
+      <text x="450" y="408" text-anchor="middle" font-size="10.5" fill="var(--muted)" font-style="italic">shown in the same left-right orientation as the front, as if seen through the board</text>
+
+      <rect x="20" y="420" width="860" height="280" rx="8" fill="var(--board)" stroke="var(--board-edge)" stroke-width="2"/>
+      <rect x="34" y="434" width="832" height="252" fill="url(#perfBack)"/>
+
+      <!-- GND bus -->
+      <line x1="100" y1="480" x2="860" y2="480" stroke="var(--w-gnd)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="100" y1="480" x2="860" y2="480" stroke="#5a6270" stroke-width="1.2" opacity="0.6"/>
+      <text x="865" y="484" font-size="11" fill="#aab1c0" font-weight="700">GND BUS</text>
+      <text x="865" y="497" font-size="9" fill="var(--muted)" font-style="italic">(its own row — row 1)</text>
+      <circle cx="100" cy="480" r="6" fill="url(#solderGlint)"/>
+      <text x="865" y="533" font-size="9" fill="var(--muted)" font-style="italic">connector pins — row 2</text>
+      <line x1="820" y1="524" x2="860" y2="524" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2,2"/>
+
+      <rect x="34" y="460" width="60" height="36" rx="4" fill="#241a10" stroke="#4a3a24"/>
+      <text x="64" y="482" text-anchor="middle" font-size="10" fill="#c9ced8" font-weight="700">PSU GND</text>
+
+      <!-- dashed via marker for P pin on back — wire lives on front, nothing here -->
+      <g stroke="#8a5a2c" stroke-width="1.3" stroke-dasharray="2,2" fill="none">
+        <circle cx="170" cy="530" r="6"/>
+        <circle cx="420" cy="530" r="6"/>
+        <circle cx="670" cy="530" r="6"/>
+      </g>
+
+      <!-- G jumpers straight down to GND bus -->
+      <g stroke="var(--w-gnd)" stroke-width="5" stroke-linecap="round">
+        <line x1="200" y1="480" x2="200" y2="530"/>
+        <line x1="450" y1="480" x2="450" y2="530"/>
+        <line x1="700" y1="480" x2="700" y2="530"/>
+      </g>
+      <g fill="url(#solderGlint)">
+        <circle cx="200" cy="480" r="5.5"/><circle cx="200" cy="530" r="5.5"/>
+        <circle cx="450" cy="480" r="5.5"/><circle cx="450" cy="530" r="5.5"/>
+        <circle cx="700" cy="480" r="5.5"/><circle cx="700" cy="530" r="5.5"/>
+      </g>
+
+      <!-- pin labels row -->
+      <g font-size="10.5" text-anchor="middle" font-weight="700">
+        <text x="170" y="550" fill="var(--w-v5)" opacity="0.55">P (front)</text>
+        <text x="200" y="550" fill="#c9ced8">G</text>
+        <text x="230" y="550" fill="var(--w-data)">D1</text>
+        <text x="260" y="550" fill="var(--w-clk)">C1</text>
+        <text x="420" y="550" fill="var(--w-v5)" opacity="0.55">P (front)</text>
+        <text x="450" y="550" fill="#c9ced8">G</text>
+        <text x="480" y="550" fill="var(--w-data)">D2</text>
+        <text x="510" y="550" fill="var(--w-clk)">C2</text>
+        <text x="670" y="550" fill="var(--w-v5)" opacity="0.55">P (front)</text>
+        <text x="700" y="550" fill="#c9ced8">G</text>
+        <text x="730" y="550" fill="var(--w-data)">D3</text>
+        <text x="760" y="550" fill="var(--w-clk)">C3</text>
+      </g>
+
+      <!-- Data / Clock straight down to ESP32 — start at the PIN ROW (530), well clear of the GND bus row (480) -->
+      <g stroke-width="5" fill="none" stroke-linecap="round">
+        <line x1="230" y1="530" x2="230" y2="640" stroke="var(--w-data)"/>
+        <line x1="260" y1="530" x2="260" y2="640" stroke="var(--w-clk)"/>
+        <line x1="480" y1="530" x2="480" y2="640" stroke="var(--w-data)"/>
+        <line x1="510" y1="530" x2="510" y2="640" stroke="var(--w-clk)"/>
+        <line x1="730" y1="530" x2="730" y2="640" stroke="var(--w-data)"/>
+        <line x1="760" y1="530" x2="760" y2="640" stroke="var(--w-clk)"/>
+      </g>
+      <!-- solder blobs at the D/C pin holes themselves, clearly separate from the bus row -->
+      <g fill="url(#solderGlint)">
+        <circle cx="230" cy="530" r="5"/><circle cx="260" cy="530" r="5"/>
+        <circle cx="480" cy="530" r="5"/><circle cx="510" cy="530" r="5"/>
+        <circle cx="730" cy="530" r="5"/><circle cx="760" cy="530" r="5"/>
+      </g>
+
+      <!-- ESP32 -->
+      <rect x="170" y="640" width="640" height="40" rx="6" fill="#20242e" stroke="#0e1015" stroke-width="1.5"/>
+      <text x="450" y="664" text-anchor="middle" font-size="12" font-weight="700" fill="#e8ecf4">ESP32 (soldered on back)</text>
+      <g fill="url(#solderGlint)">
+        <circle cx="230" cy="640" r="5"/><circle cx="260" cy="640" r="5"/>
+        <circle cx="480" cy="640" r="5"/><circle cx="510" cy="640" r="5"/>
+        <circle cx="730" cy="640" r="5"/><circle cx="760" cy="640" r="5"/>
+      </g>
+
+      <!-- ESP32 GND pin tied into the shared GND bus (common ground) -->
+      <circle cx="790" cy="640" r="5" fill="url(#solderGlint)"/>
+      <text x="790" y="632" text-anchor="middle" font-size="9.5" fill="#c9ced8" font-weight="700">GND</text>
+      <path d="M 790 640 L 790 500 A 8 8 0 0 1 800 492 L 815 492 A 8 8 0 0 1 823 484 L 823 480"
+            fill="none" stroke="var(--w-gnd)" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="823" cy="480" r="5.5" fill="url(#solderGlint)"/>
+      <text x="850" y="470" font-size="9.5" fill="#c9ced8" font-style="italic">ESP32 GND → GND BUS</text>
+      <text x="850" y="482" font-size="9.5" fill="#c9ced8" font-style="italic">(common ground tie-in)</text>
+
+      <text x="450" y="700" text-anchor="middle" font-size="10.5" fill="#5a4a30" font-style="italic">
+        Dashed circles = P pin passes straight through here — its +5V wire is entirely on the FRONT, nothing routed for it on this face
+      </text>
+
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="swatch" style="background:var(--w-v5)"></div>+5V — lives only on the front</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-gnd)"></div>GND — lives only on the back</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-data)"></div>Data — back</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-clk)"></div>Clock — back</div>
+  </div>
+
+  <div class="note">
+    Each hole in the board is a single physical via that both faces share — a wire soldered to it on the front and a different
+    wire soldered to it on the back are still the same electrical node, they just approach from opposite directions.
+    Because the <b>entire +5V network stays on the front</b> and the <b>GND/Data/Clock networks stay on the back</b>,
+    the red and black lines never share a plane at all — not even the small arch from before. No heat-shrink, no glue dot,
+    no clearance to maintain. The only thing to double check per connector: the P pin's lead needs to actually be soldered
+    on the front side pad, while G/D/C get soldered on the back as usual.<br><br>
+    The extra black wire routed from the <b>ESP32's own GND pin into the GND bus</b> is what makes this a true common ground —
+    it's the same bus feeding all three LED strips' ground pins, so the ESP32's data/clock signals and the strips' ground
+    reference are identical. This tie-in only needs to happen at one point on the bus; it doesn't need to be repeated per strip,
+    since the bus wire itself is already electrically one continuous node end to end.
+  </div>
+
+</body>
+</html>

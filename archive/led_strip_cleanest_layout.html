@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cleanest Layout — Zero Hops, Front/Back Split, 6 Strips</title>
+<style>
+  :root {
+    --bg: #10131a;
+    --panel: #1a1e28;
+    --board: #d8c39c;
+    --board-edge: #8a7550;
+    --pad: #c48a4f;
+    --pad-dark: #8a5a2c;
+    --hole: #2a1d10;
+    --solder: #d9dde3;
+    --solder-shadow: #9aa0aa;
+    --w-v5: #e0393f;
+    --w-gnd: #262a30;
+    --w-data: #2f8fd6;
+    --w-clk: #f2a33d;
+    --text: #e8ecf4;
+    --muted: #98a2b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px; background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", Roboto, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  h1 { font-size: 20px; font-weight: 600; margin: 0; text-align: center; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-top: -8px; text-align: center; max-width: 760px; }
+  .board-wrap {
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 12px;
+    padding: 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  svg { display: block; }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 18px; justify-content: center;
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 10px;
+    padding: 12px 20px; font-size: 13px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .swatch { width: 24px; height: 6px; border-radius: 3px; }
+  .note { max-width: 760px; font-size: 12.5px; color: var(--muted); line-height: 1.55; text-align: center; }
+  .note b { color: var(--text); }
+  .callout {
+    max-width: 760px; font-size: 12.5px; color: var(--text); line-height: 1.55; text-align: left;
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 10px; padding: 14px 18px;
+  }
+  .callout b { color: #ffd479; }
+</style>
+</head>
+<body>
+
+  <h1>Cleanest Layout: Zero Hops, Front/Back Split, 6 Strips + Level Shifting</h1>
+  <div class="subtitle">Same functionality as the flanking design — 6 strips, 2× SN74HCT245, dual ESP32 headers, XT30 power inlet sized for ~12.7A worst case — but back to the original P-G-D-C pin order, split across both faces. No hops, no arches, anywhere.</div>
+
+  <div class="board-wrap">
+    <svg viewBox="0 0 900 1980" width="900" height="1980">
+
+      <defs>
+        <radialGradient id="solderGlint" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="45%" stop-color="var(--solder)"/>
+          <stop offset="100%" stop-color="var(--solder-shadow)"/>
+        </radialGradient>
+        <pattern id="perf" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="4.4" fill="var(--pad)" stroke="var(--pad-dark)" stroke-width="0.8"/>
+          <circle cx="11" cy="11" r="1.6" fill="var(--hole)"/>
+        </pattern>
+      </defs>
+
+      <!-- ================= FRONT PANEL — +5V network only ================= -->
+      <text x="450" y="45" text-anchor="middle" font-size="15" font-weight="700" fill="var(--w-v5)">FRONT — component side: +5V network only</text>
+
+      <rect x="20" y="60" width="860" height="870" rx="8" fill="var(--board)" stroke="var(--board-edge)" stroke-width="2"/>
+      <rect x="34" y="74" width="832" height="842" fill="url(#perf)"/>
+
+      <!-- +5V bus A -->
+      <line x1="100" y1="150" x2="860" y2="150" stroke="var(--w-v5)" stroke-width="6" stroke-linecap="round"/>
+      <text x="865" y="154" font-size="11" fill="var(--w-v5)" font-weight="700">+5V BUS A</text>
+      <circle cx="100" cy="150" r="6" fill="url(#solderGlint)"/>
+
+      <!-- XT30 power inlet, sized for 80%-capped 6-strip worst case (~12.7A) -->
+      <rect x="0" y="440" width="34" height="44" rx="4" fill="#2c2c2e" stroke="#111" stroke-width="1.5"/>
+      <circle cx="14" cy="454" r="4" fill="url(#solderGlint)"/>
+      <circle cx="14" cy="470" r="4" fill="none" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="2,2"/>
+      <text x="17" y="422" text-anchor="middle" font-size="9.5" fill="var(--text)" font-weight="700">XT30 INLET</text>
+      <text x="17" y="433" text-anchor="middle" font-size="7.5" fill="var(--muted)">(~30A rated)</text>
+      <text x="17" y="497" text-anchor="middle" font-size="8.5" fill="var(--muted)">GND lead → back face</text>
+      <text x="40" y="457" font-size="8.5" fill="var(--w-v5)" font-weight="700">+5V</text>
+
+      <!-- +5V trunk — 12-14 AWG, carries combined current for all 6 strips -->
+      <path d="M 14 454 L 50 454 L 50 150 L 100 150" fill="none" stroke="var(--w-v5)" stroke-width="3"/>
+      <path d="M 50 454 L 50 890 L 100 890" fill="none" stroke="var(--w-v5)" stroke-width="3"/>
+      <circle cx="50" cy="454" r="3.5" fill="url(#solderGlint)"/>
+
+      <!-- External power source: 1S LiPo -> boost converter -> XT30 inlet (off-board, shown for reference) -->
+      <line x1="17" y1="484" x2="17" y2="504" stroke="var(--muted)" stroke-width="2" stroke-dasharray="2,2"/>
+      <rect x="0" y="504" width="70" height="30" rx="4" fill="none" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="3,2"/>
+      <text x="35" y="518" text-anchor="middle" font-size="8" fill="var(--muted)" font-weight="700">BOOST CONV.</text>
+      <text x="35" y="529" text-anchor="middle" font-size="7.5" fill="var(--muted)">5V out, ≥15A</text>
+      <line x1="17" y1="534" x2="17" y2="546" stroke="var(--muted)" stroke-width="2" stroke-dasharray="2,2"/>
+      <rect x="0" y="546" width="70" height="32" rx="4" fill="none" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="3,2"/>
+      <text x="35" y="561" text-anchor="middle" font-size="8" fill="var(--muted)" font-weight="700">1S LiPo</text>
+      <text x="35" y="572" text-anchor="middle" font-size="7.5" fill="var(--muted)">6000mAh, 3.7V</text>
+      <text x="80" y="520" font-size="7.5" fill="var(--muted)" font-style="italic">off-board —</text>
+      <text x="80" y="531" font-size="7.5" fill="var(--muted)" font-style="italic">single connector,</text>
+      <text x="80" y="542" font-size="7.5" fill="var(--muted)" font-style="italic">no balance lead</text>
+      <text x="58" y="600" font-size="8" fill="var(--w-v5)" font-weight="700" transform="rotate(-90 58 600)" text-anchor="middle">12-14 AWG — combined 6-strip current (~12.7A worst case)</text>
+
+      <!-- 1000uF+ bulk capacitor, right at the power inlet -->
+      <circle cx="75" cy="454" r="12" fill="#2c2c2e" stroke="var(--w-v5)" stroke-width="1.5"/>
+      <line x1="69" y1="447" x2="81" y2="447" stroke="var(--w-v5)" stroke-width="1.3"/>
+      <line x1="63" y1="454" x2="50" y2="454" stroke="var(--w-v5)" stroke-width="2"/>
+      <text x="75" y="480" text-anchor="middle" font-size="8" fill="var(--w-v5)" font-weight="700">1000µF+</text>
+      <text x="75" y="491" text-anchor="middle" font-size="7.5" fill="var(--muted)">bulk cap</text>
+      <text x="75" y="502" text-anchor="middle" font-size="7.5" fill="var(--muted)">(GND lead → back)</text>
+
+      <!-- JST 1-3 housings + P taps (solid) + G/D/C dashed vias -->
+      <g font-size="11" font-weight="700" text-anchor="middle" fill="#3a2c14">
+        <text x="215" y="245">JST-1 → Strip 1</text>
+        <text x="465" y="245">JST-2 → Strip 2</text>
+        <text x="715" y="245">JST-3 → Strip 3</text>
+      </g>
+      <g fill="#2c2c2e" stroke="#111" stroke-width="1.5">
+        <rect x="158" y="258" width="114" height="26" rx="4"/>
+        <rect x="408" y="258" width="114" height="26" rx="4"/>
+        <rect x="658" y="258" width="114" height="26" rx="4"/>
+      </g>
+      <g stroke="var(--w-v5)" stroke-width="5" stroke-linecap="round">
+        <line x1="170" y1="271" x2="170" y2="150"/>
+        <line x1="420" y1="271" x2="420" y2="150"/>
+        <line x1="670" y1="271" x2="670" y2="150"/>
+      </g>
+      <g fill="url(#solderGlint)">
+        <circle cx="170" cy="150" r="5.5"/><circle cx="170" cy="271" r="5.5"/>
+        <circle cx="420" cy="150" r="5.5"/><circle cx="420" cy="271" r="5.5"/>
+        <circle cx="670" cy="150" r="5.5"/><circle cx="670" cy="271" r="5.5"/>
+      </g>
+      <g stroke="#8a5a2c" stroke-width="1.3" stroke-dasharray="2,2" fill="none">
+        <circle cx="200" cy="271" r="6"/><circle cx="230" cy="271" r="6"/><circle cx="260" cy="271" r="6"/>
+        <circle cx="450" cy="271" r="6"/><circle cx="480" cy="271" r="6"/><circle cx="510" cy="271" r="6"/>
+        <circle cx="700" cy="271" r="6"/><circle cx="730" cy="271" r="6"/><circle cx="760" cy="271" r="6"/>
+      </g>
+
+      <!-- Chip 1 footprint (light) + VCC solid tap -->
+      <rect x="350" y="340" width="220" height="50" rx="6" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3,3"/>
+      <text x="460" y="368" text-anchor="middle" font-size="10.5" fill="var(--muted)">SN74HCT245 #1 (footprint)</text>
+      <circle cx="565" cy="340" r="4.5" fill="url(#solderGlint)"/>
+      <text x="578" y="336" font-size="8.5" fill="var(--w-v5)" font-weight="700">VCC</text>
+      <line x1="565" y1="340" x2="565" y2="150" stroke="var(--w-v5)" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="565" cy="150" r="5" fill="url(#solderGlint)"/>
+
+      <!-- ESP32 footprint (light) + power-in solid tap -->
+      <rect x="290" y="510" width="320" height="100" rx="6" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3,3"/>
+      <text x="450" y="565" text-anchor="middle" font-size="10.5" fill="var(--muted)">ESP32 (footprint)</text>
+      <circle cx="625" cy="530" r="4.5" fill="url(#solderGlint)"/>
+      <text x="638" y="526" font-size="8.5" fill="var(--w-v5)" font-weight="700">5V IN</text>
+      <line x1="625" y1="530" x2="625" y2="150" stroke="var(--w-v5)" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="625" cy="150" r="5" fill="url(#solderGlint)"/>
+
+      <!-- Chip 2 footprint (light) + VCC solid tap -->
+      <rect x="350" y="640" width="220" height="50" rx="6" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3,3"/>
+      <text x="460" y="668" text-anchor="middle" font-size="10.5" fill="var(--muted)">SN74HCT245 #2 (footprint)</text>
+      <circle cx="565" cy="690" r="4.5" fill="url(#solderGlint)"/>
+      <text x="578" y="702" font-size="8.5" fill="var(--w-v5)" font-weight="700">VCC</text>
+      <line x1="565" y1="690" x2="565" y2="890" stroke="var(--w-v5)" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="565" cy="890" r="5" fill="url(#solderGlint)"/>
+
+      <!-- JST 4-6 housings + P taps (down to bus B) -->
+      <g fill="#2c2c2e" stroke="#111" stroke-width="1.5">
+        <rect x="158" y="756" width="114" height="26" rx="4"/>
+        <rect x="408" y="756" width="114" height="26" rx="4"/>
+        <rect x="658" y="756" width="114" height="26" rx="4"/>
+      </g>
+      <g stroke="var(--w-v5)" stroke-width="5" stroke-linecap="round">
+        <line x1="170" y1="769" x2="170" y2="890"/>
+        <line x1="420" y1="769" x2="420" y2="890"/>
+        <line x1="670" y1="769" x2="670" y2="890"/>
+      </g>
+      <g fill="url(#solderGlint)">
+        <circle cx="170" cy="769" r="5.5"/><circle cx="170" cy="890" r="5.5"/>
+        <circle cx="420" cy="769" r="5.5"/><circle cx="420" cy="890" r="5.5"/>
+        <circle cx="670" cy="769" r="5.5"/><circle cx="670" cy="890" r="5.5"/>
+      </g>
+      <g stroke="#8a5a2c" stroke-width="1.3" stroke-dasharray="2,2" fill="none">
+        <circle cx="200" cy="769" r="6"/><circle cx="230" cy="769" r="6"/><circle cx="260" cy="769" r="6"/>
+        <circle cx="450" cy="769" r="6"/><circle cx="480" cy="769" r="6"/><circle cx="510" cy="769" r="6"/>
+        <circle cx="700" cy="769" r="6"/><circle cx="730" cy="769" r="6"/><circle cx="760" cy="769" r="6"/>
+      </g>
+      <g font-size="11" font-weight="700" text-anchor="middle" fill="#3a2c14">
+        <text x="215" y="805">JST-4 → Strip 4</text>
+        <text x="465" y="805">JST-5 → Strip 5</text>
+        <text x="715" y="805">JST-6 → Strip 6</text>
+      </g>
+
+      <!-- +5V bus B -->
+      <line x1="100" y1="890" x2="860" y2="890" stroke="var(--w-v5)" stroke-width="6" stroke-linecap="round"/>
+      <text x="865" y="894" font-size="11" fill="var(--w-v5)" font-weight="700">+5V BUS B</text>
+
+      <text x="450" y="915" text-anchor="middle" font-size="10" fill="#5a4a30" font-style="italic">
+        Dashed circles/rects = through-holes and footprints wired on the BACK face — nothing else routed here
+      </text>
+
+      <!-- ================= BACK PANEL — everything else ================= -->
+      <g transform="translate(0,980)">
+
+        <text x="450" y="0" text-anchor="middle" font-size="15" font-weight="700" fill="#c9ced8">BACK — solder side: GND + Data/Clock + chips + ESP32</text>
+        <text x="450" y="18" text-anchor="middle" font-size="10.5" fill="var(--muted)" font-style="italic">same left-right orientation as front, as if seen through the board</text>
+
+        <rect x="20" y="30" width="860" height="930" rx="8" fill="var(--board)" stroke="var(--board-edge)" stroke-width="2"/>
+        <rect x="34" y="44" width="832" height="902" fill="url(#perf)"/>
+
+        <!-- GND bus A -->
+        <line x1="100" y1="120" x2="860" y2="120" stroke="var(--w-gnd)" stroke-width="6" stroke-linecap="round"/>
+        <text x="865" y="124" font-size="11" fill="#aab1c0" font-weight="700">GND BUS A</text>
+        <circle cx="100" cy="120" r="6" fill="url(#solderGlint)"/>
+
+        <!-- power inlet GND lead (XT30, matches front panel) -->
+        <rect x="0" y="410" width="34" height="44" rx="4" fill="#2c2c2e" stroke="#111" stroke-width="1.5"/>
+        <circle cx="14" cy="424" r="4" fill="none" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="2,2"/>
+        <circle cx="14" cy="440" r="4" fill="url(#solderGlint)"/>
+        <text x="17" y="392" text-anchor="middle" font-size="9" fill="var(--text)" font-weight="700">XT30 INLET</text>
+        <text x="40" y="443" font-size="8.5" fill="#c9ced8" font-weight="700">GND</text>
+        <path d="M 14 440 L 72 440 L 72 120 L 100 120" fill="none" stroke="var(--w-gnd)" stroke-width="3"/>
+        <path d="M 72 440 L 72 910 L 100 910" fill="none" stroke="var(--w-gnd)" stroke-width="3"/>
+        <circle cx="72" cy="440" r="3.5" fill="url(#solderGlint)"/>
+        <text x="80" y="600" font-size="8" fill="#aab1c0" font-weight="700" transform="rotate(-90 80 600)" text-anchor="middle">12-14 AWG — combined 6-strip return current</text>
+
+        <!-- bulk cap's GND lead - real connection is here, +5V side is a via to front -->
+        <circle cx="95" cy="440" r="4" fill="none" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="2,2"/>
+        <text x="95" y="428" text-anchor="middle" font-size="7.5" fill="var(--muted)">1000µF+ bulk cap</text>
+        <text x="95" y="416" text-anchor="middle" font-size="7.5" fill="var(--muted)">(+5V lead → front)</text>
+
+        <!-- JST 1-3 pin row: G solid up, D/C solid down, P dashed via -->
+        <g fill="#2c2c2e" stroke="#111" stroke-width="1.5">
+          <rect x="158" y="228" width="114" height="26" rx="4"/>
+          <rect x="408" y="228" width="114" height="26" rx="4"/>
+          <rect x="658" y="228" width="114" height="26" rx="4"/>
+        </g>
+        <g stroke="#8a5a2c" stroke-width="1.3" stroke-dasharray="2,2" fill="none">
+          <circle cx="170" cy="241" r="6"/><circle cx="420" cy="241" r="6"/><circle cx="670" cy="241" r="6"/>
+        </g>
+        <g stroke="var(--w-gnd)" stroke-width="5" stroke-linecap="round">
+          <line x1="200" y1="241" x2="200" y2="120"/>
+          <line x1="450" y1="241" x2="450" y2="120"/>
+          <line x1="700" y1="241" x2="700" y2="120"/>
+        </g>
+        <g fill="url(#solderGlint)">
+          <circle cx="200" cy="120" r="5.5"/><circle cx="200" cy="241" r="5.5"/>
+          <circle cx="450" cy="120" r="5.5"/><circle cx="450" cy="241" r="5.5"/>
+          <circle cx="700" cy="120" r="5.5"/><circle cx="700" cy="241" r="5.5"/>
+        </g>
+        <g font-size="10" font-weight="700" text-anchor="middle">
+          <text x="170" y="270" fill="var(--w-v5)" opacity="0.5">P(front)</text>
+          <text x="200" y="270" fill="#c9ced8">G</text>
+          <text x="230" y="270" fill="var(--w-data)">D1</text>
+          <text x="260" y="270" fill="var(--w-clk)">C1</text>
+          <text x="420" y="270" fill="var(--w-v5)" opacity="0.5">P(front)</text>
+          <text x="450" y="270" fill="#c9ced8">G</text>
+          <text x="480" y="270" fill="var(--w-data)">D2</text>
+          <text x="510" y="270" fill="var(--w-clk)">C2</text>
+          <text x="670" y="270" fill="var(--w-v5)" opacity="0.5">P(front)</text>
+          <text x="700" y="270" fill="#c9ced8">G</text>
+          <text x="730" y="270" fill="var(--w-data)">D3</text>
+          <text x="760" y="270" fill="var(--w-clk)">C3</text>
+        </g>
+
+        <!-- D/C from JST down to their fan level (each channel jogs at its own row — no two share a row segment) -->
+        <g stroke-width="4" stroke-linecap="round">
+          <line x1="230" y1="241" x2="230" y2="304" stroke="var(--w-data)"/>
+          <line x1="260" y1="241" x2="260" y2="296" stroke="var(--w-clk)"/>
+          <line x1="480" y1="241" x2="480" y2="296" stroke="var(--w-data)"/>
+          <line x1="510" y1="241" x2="510" y2="304" stroke="var(--w-clk)"/>
+          <line x1="730" y1="241" x2="730" y2="312" stroke="var(--w-data)"/>
+          <line x1="760" y1="241" x2="760" y2="320" stroke="var(--w-clk)"/>
+        </g>
+
+        <!-- Chip 1 -->
+        <rect x="350" y="340" width="220" height="50" rx="6" fill="#20242e" stroke="#e8ecf4" stroke-width="1.5"/>
+        <circle cx="362" cy="352" r="3" fill="none" stroke="#e8ecf4" stroke-width="1"/>
+        <text x="460" y="370" text-anchor="middle" font-size="12" font-weight="700" fill="#e8ecf4">SN74HCT245 #1</text>
+        <g fill="url(#solderGlint)">
+          <circle cx="230" cy="340" r="4"/><circle cx="260" cy="340" r="4"/>
+          <circle cx="480" cy="340" r="4"/><circle cx="510" cy="340" r="4"/>
+          <circle cx="730" cy="340" r="4"/><circle cx="760" cy="340" r="4"/>
+        </g>
+        <text x="365" y="333" text-anchor="middle" font-size="8" fill="var(--muted)">B-outputs (top edge)</text>
+
+        <!-- fan Y-outputs to D/C columns: each channel jogs at its own row, then drops vertically to its chip pin -->
+        <g stroke-width="4" stroke-linecap="round" fill="none">
+          <path d="M 230 304 L 380 304 L 380 340" stroke="var(--w-data)"/>
+          <path d="M 260 296 L 405 296 L 405 340" stroke="var(--w-clk)"/>
+          <path d="M 480 296 L 430 296 L 430 340" stroke="var(--w-data)"/>
+          <path d="M 510 304 L 455 304 L 455 340" stroke="var(--w-clk)"/>
+          <path d="M 730 312 L 480 312 L 480 340" stroke="var(--w-data)"/>
+          <path d="M 760 320 L 505 320 L 505 340" stroke="var(--w-clk)"/>
+        </g>
+        <g fill="url(#solderGlint)">
+          <circle cx="380" cy="340" r="4"/><circle cx="405" cy="340" r="4"/>
+          <circle cx="430" cy="340" r="4"/><circle cx="455" cy="340" r="4"/>
+          <circle cx="480" cy="340" r="4"/><circle cx="505" cy="340" r="4"/>
+        </g>
+
+        <!-- 220Ω series resistors, placed on the level-shifter output side of each Data/Clock line -->
+        <g stroke="#c9a875" stroke-width="1.2">
+          <rect x="354" y="300" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="379" y="292" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="434" y="292" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="459" y="300" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="484" y="308" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="509" y="316" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+        </g>
+        <circle cx="345" cy="340" r="4.5" fill="url(#solderGlint)"/>
+        <text x="345" y="333" text-anchor="middle" font-size="8" fill="#c9ced8" font-weight="700">GND</text>
+        <path d="M 345 340 L 130 340 L 130 120" fill="none" stroke="var(--w-gnd)" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="130" cy="120" r="5" fill="url(#solderGlint)"/>
+
+        <!-- Chip1 VCC via marker (real wire on front) -->
+        <circle cx="565" cy="340" r="4" fill="none" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="2,2"/>
+        <text x="578" y="336" font-size="8" fill="var(--muted)">VCC (front)</text>
+
+        <!-- 0.1uF decoupling cap, right next to chip1, bridging VCC via and local GND -->
+        <line x1="590" y1="340" x2="565" y2="340" stroke="var(--w-v5)" stroke-width="2"/>
+        <circle cx="590" cy="340" r="2.5" fill="url(#solderGlint)"/>
+        <line x1="590" y1="340" x2="590" y2="355" stroke="var(--w-v5)" stroke-width="2"/>
+        <line x1="582" y1="355" x2="598" y2="355" stroke="var(--w-v5)" stroke-width="2.5"/>
+        <line x1="582" y1="362" x2="598" y2="362" stroke="var(--w-gnd)" stroke-width="2.5"/>
+        <line x1="590" y1="362" x2="590" y2="400" stroke="var(--w-gnd)" stroke-width="2"/>
+        <line x1="590" y1="400" x2="345" y2="400" stroke="var(--w-gnd)" stroke-width="2"/>
+        <circle cx="590" cy="400" r="2.5" fill="url(#solderGlint)"/>
+        <text x="608" y="358" font-size="7.5" fill="var(--muted)">0.1µF</text>
+
+        <!-- OE tied low (always enabled) -->
+        <circle cx="360" cy="390" r="4" fill="url(#solderGlint)"/>
+        <path d="M 360 390 L 360 400 L 345 400 L 345 344" fill="none" stroke="var(--w-gnd)" stroke-width="2.5"/>
+        <text x="360" y="414" text-anchor="middle" font-size="8" fill="var(--muted)">OE → GND</text>
+
+        <!-- DIR strapped HIGH (A→B) via a local jumper to the VCC via point -->
+        <circle cx="374" cy="390" r="4" fill="none" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="2,2"/>
+        <path d="M 374 390 L 374 400 L 565 400 L 565 344" fill="none" stroke="var(--w-v5)" stroke-width="2" stroke-dasharray="3,2"/>
+        <text x="374" y="414" text-anchor="middle" font-size="8" fill="var(--muted)">DIR → VCC (A→B)</text>
+
+        <!-- Chip1 A-inputs straight down to ESP32 -->
+        <g fill="url(#solderGlint)">
+          <circle cx="380" cy="390" r="4"/><circle cx="405" cy="390" r="4"/>
+          <circle cx="430" cy="390" r="4"/><circle cx="455" cy="390" r="4"/>
+          <circle cx="480" cy="390" r="4"/><circle cx="505" cy="390" r="4"/>
+        </g>
+        <g stroke-width="4" stroke-linecap="round">
+          <line x1="380" y1="390" x2="380" y2="510" stroke="var(--w-data)"/>
+          <line x1="405" y1="390" x2="405" y2="510" stroke="var(--w-clk)"/>
+          <line x1="430" y1="390" x2="430" y2="510" stroke="var(--w-data)"/>
+          <line x1="455" y1="390" x2="455" y2="510" stroke="var(--w-clk)"/>
+          <line x1="480" y1="390" x2="480" y2="510" stroke="var(--w-data)"/>
+          <line x1="505" y1="390" x2="505" y2="510" stroke="var(--w-clk)"/>
+        </g>
+
+        <!-- ESP32 -->
+        <rect x="290" y="510" width="320" height="100" rx="6" fill="#20242e" stroke="#0e1015" stroke-width="1.5"/>
+        <text x="450" y="555" text-anchor="middle" font-size="13" font-weight="700" fill="#e8ecf4">ESP32</text>
+        <text x="450" y="530" text-anchor="middle" font-size="8.5" fill="var(--muted)">top row — Circuit A</text>
+        <text x="450" y="602" text-anchor="middle" font-size="8.5" fill="var(--muted)">bottom row — Circuit B</text>
+        <g fill="url(#solderGlint)">
+          <circle cx="380" cy="510" r="4.5"/><circle cx="405" cy="510" r="4.5"/>
+          <circle cx="430" cy="510" r="4.5"/><circle cx="455" cy="510" r="4.5"/>
+          <circle cx="480" cy="510" r="4.5"/><circle cx="505" cy="510" r="4.5"/>
+        </g>
+        <g fill="url(#solderGlint)">
+          <circle cx="380" cy="610" r="4.5"/><circle cx="405" cy="610" r="4.5"/>
+          <circle cx="430" cy="610" r="4.5"/><circle cx="455" cy="610" r="4.5"/>
+          <circle cx="480" cy="610" r="4.5"/><circle cx="505" cy="610" r="4.5"/>
+        </g>
+        <g font-size="8.5" text-anchor="middle" fill="var(--muted)">
+          <text x="380" y="523">D1</text><text x="405" y="523">C1</text><text x="430" y="523">D2</text>
+          <text x="455" y="523">C2</text><text x="480" y="523">D3</text><text x="505" y="523">C3</text>
+          <text x="380" y="626">D4</text><text x="405" y="626">C4</text><text x="430" y="626">D5</text>
+          <text x="455" y="626">C5</text><text x="480" y="626">D6</text><text x="505" y="626">C6</text>
+        </g>
+
+        <!-- ESP32 GND: from right edge of module, right along y=545, then up a clear lane at x=800 (right of all fan/JST wiring) to GND bus A -->
+        <circle cx="610" cy="545" r="5" fill="url(#solderGlint)"/>
+        <text x="597" y="540" text-anchor="end" font-size="8.5" fill="#c9ced8" font-weight="700">GND</text>
+        <path d="M 610 545 L 800 545 L 800 120" fill="none" stroke="var(--w-gnd)" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="800" cy="120" r="5" fill="url(#solderGlint)"/>
+
+        <!-- ESP32 power-in via marker (real wire on front) -->
+        <circle cx="625" cy="530" r="4" fill="none" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="2,2"/>
+        <text x="638" y="526" font-size="8" fill="var(--muted)">5V IN (front)</text>
+
+        <!-- Chip2 A-inputs from ESP32 bottom row -->
+        <g stroke-width="4" stroke-linecap="round">
+          <line x1="380" y1="610" x2="380" y2="640" stroke="var(--w-data)"/>
+          <line x1="405" y1="610" x2="405" y2="640" stroke="var(--w-clk)"/>
+          <line x1="430" y1="610" x2="430" y2="640" stroke="var(--w-data)"/>
+          <line x1="455" y1="610" x2="455" y2="640" stroke="var(--w-clk)"/>
+          <line x1="480" y1="610" x2="480" y2="640" stroke="var(--w-data)"/>
+          <line x1="505" y1="610" x2="505" y2="640" stroke="var(--w-clk)"/>
+        </g>
+
+        <!-- Chip 2 -->
+        <rect x="350" y="640" width="220" height="50" rx="6" fill="#20242e" stroke="#e8ecf4" stroke-width="1.5"/>
+        <circle cx="362" cy="652" r="3" fill="none" stroke="#e8ecf4" stroke-width="1"/>
+        <text x="460" y="670" text-anchor="middle" font-size="12" font-weight="700" fill="#e8ecf4">SN74HCT245 #2</text>
+        <g fill="url(#solderGlint)">
+          <circle cx="380" cy="640" r="4"/><circle cx="405" cy="640" r="4"/>
+          <circle cx="430" cy="640" r="4"/><circle cx="455" cy="640" r="4"/>
+          <circle cx="480" cy="640" r="4"/><circle cx="505" cy="640" r="4"/>
+        </g>
+        <text x="365" y="704" text-anchor="middle" font-size="8" fill="var(--muted)">B-outputs (bottom edge)</text>
+
+        <!-- Chip2 GND: left along y=690 (above all fan rows), then down a clear lane at x=130 to GND bus B -->
+        <circle cx="345" cy="690" r="4.5" fill="url(#solderGlint)"/>
+        <text x="330" y="684" text-anchor="end" font-size="8" fill="#c9ced8" font-weight="700">GND</text>
+        <path d="M 345 690 L 130 690 L 130 910" fill="none" stroke="var(--w-gnd)" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="130" cy="910" r="5" fill="url(#solderGlint)"/>
+
+        <!-- 0.1uF decoupling cap, tied into the GND run above via a junction, VCC via nearby -->
+        <circle cx="190" cy="665" r="4" fill="none" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="2,2"/>
+        <text x="203" y="661" font-size="7.5" fill="var(--muted)">VCC (front)</text>
+        <line x1="190" y1="665" x2="190" y2="678" stroke="var(--w-v5)" stroke-width="2"/>
+        <line x1="182" y1="680" x2="198" y2="680" stroke="var(--w-v5)" stroke-width="2.5"/>
+        <line x1="182" y1="687" x2="198" y2="687" stroke="var(--w-gnd)" stroke-width="2.5"/>
+        <line x1="190" y1="687" x2="190" y2="690" stroke="var(--w-gnd)" stroke-width="2"/>
+        <circle cx="190" cy="690" r="2.5" fill="url(#solderGlint)"/>
+        <text x="205" y="684" font-size="7.5" fill="var(--muted)">0.1µF</text>
+
+        <!-- Chip2 VCC via marker -->
+        <circle cx="565" cy="690" r="4" fill="none" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="2,2"/>
+        <text x="578" y="702" font-size="8" fill="var(--muted)">VCC (front)</text>
+
+        <!-- OE tied low (always enabled) -->
+        <circle cx="360" cy="690" r="4" fill="url(#solderGlint)"/>
+        <path d="M 360 690 L 360 680 L 345 680 L 345 694" fill="none" stroke="var(--w-gnd)" stroke-width="2.5"/>
+        <text x="360" y="668" text-anchor="middle" font-size="8" fill="var(--muted)">OE → GND</text>
+
+        <!-- DIR strapped HIGH (A→B) via a local jumper to the VCC via point -->
+        <circle cx="374" cy="690" r="4" fill="none" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="2,2"/>
+        <path d="M 374 690 L 374 680 L 565 680 L 565 694" fill="none" stroke="var(--w-v5)" stroke-width="2" stroke-dasharray="3,2"/>
+        <text x="374" y="668" text-anchor="middle" font-size="8" fill="var(--muted)">DIR → VCC (A→B)</text>
+
+        <!-- Chip2 B-outputs straight down to JST4-6 D/C, zero crossings -->
+        <g fill="url(#solderGlint)">
+          <circle cx="380" cy="690" r="4"/><circle cx="405" cy="690" r="4"/>
+          <circle cx="430" cy="690" r="4"/><circle cx="455" cy="690" r="4"/>
+          <circle cx="480" cy="690" r="4"/><circle cx="505" cy="690" r="4"/>
+        </g>
+        <g stroke-width="4" stroke-linecap="round" fill="none">
+          <path d="M 380 690 L 380 704 L 230 704 L 230 789" stroke="var(--w-data)"/>
+          <path d="M 405 690 L 405 712 L 260 712 L 260 789" stroke="var(--w-clk)"/>
+          <path d="M 430 690 L 430 728 L 480 728 L 480 789" stroke="var(--w-data)"/>
+          <path d="M 455 690 L 455 720 L 510 720 L 510 789" stroke="var(--w-clk)"/>
+          <path d="M 480 690 L 480 712 L 730 712 L 730 789" stroke="var(--w-data)"/>
+          <path d="M 505 690 L 505 704 L 760 704 L 760 789" stroke="var(--w-clk)"/>
+        </g>
+
+        <!-- 220Ω series resistors, placed on the level-shifter output side of each Data/Clock line -->
+        <g stroke="#c9a875" stroke-width="1.2">
+          <rect x="354" y="700" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="379" y="708" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="434" y="724" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="459" y="716" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="484" y="708" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="509" y="700" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+        </g>
+
+        <!-- JST 4-6 pin row -->
+        <g fill="#2c2c2e" stroke="#111" stroke-width="1.5">
+          <rect x="158" y="776" width="114" height="26" rx="4"/>
+          <rect x="408" y="776" width="114" height="26" rx="4"/>
+          <rect x="658" y="776" width="114" height="26" rx="4"/>
+        </g>
+        <g stroke="#8a5a2c" stroke-width="1.3" stroke-dasharray="2,2" fill="none">
+          <circle cx="170" cy="789" r="6"/><circle cx="420" cy="789" r="6"/><circle cx="670" cy="789" r="6"/>
+        </g>
+        <g stroke="var(--w-gnd)" stroke-width="5" stroke-linecap="round">
+          <line x1="200" y1="789" x2="200" y2="910"/>
+          <line x1="450" y1="789" x2="450" y2="910"/>
+          <line x1="700" y1="789" x2="700" y2="910"/>
+        </g>
+        <g fill="url(#solderGlint)">
+          <circle cx="200" cy="789" r="5.5"/><circle cx="450" cy="789" r="5.5"/><circle cx="700" cy="789" r="5.5"/>
+          <circle cx="200" cy="910" r="5.5"/><circle cx="450" cy="910" r="5.5"/><circle cx="700" cy="910" r="5.5"/>
+        </g>
+        <g font-size="10" font-weight="700" text-anchor="middle">
+          <text x="170" y="765" fill="var(--w-v5)" opacity="0.5">P(front)</text>
+          <text x="200" y="765" fill="#c9ced8">G</text>
+          <text x="230" y="765" fill="var(--w-data)">D4</text>
+          <text x="260" y="765" fill="var(--w-clk)">C4</text>
+          <text x="420" y="765" fill="var(--w-v5)" opacity="0.5">P(front)</text>
+          <text x="450" y="765" fill="#c9ced8">G</text>
+          <text x="480" y="765" fill="var(--w-data)">D5</text>
+          <text x="510" y="765" fill="var(--w-clk)">C5</text>
+          <text x="670" y="765" fill="var(--w-v5)" opacity="0.5">P(front)</text>
+          <text x="700" y="765" fill="#c9ced8">G</text>
+          <text x="730" y="765" fill="var(--w-data)">D6</text>
+          <text x="760" y="765" fill="var(--w-clk)">C6</text>
+        </g>
+        <g font-size="11" font-weight="700" text-anchor="middle" fill="#3a2c14">
+          <text x="215" y="850">JST-4 → Strip 4</text>
+          <text x="465" y="850">JST-5 → Strip 5</text>
+          <text x="715" y="850">JST-6 → Strip 6</text>
+        </g>
+
+        <!-- GND bus B -->
+        <line x1="100" y1="910" x2="860" y2="910" stroke="var(--w-gnd)" stroke-width="6" stroke-linecap="round"/>
+        <text x="865" y="914" font-size="11" fill="#aab1c0" font-weight="700">GND BUS B</text>
+
+      </g>
+
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="swatch" style="background:var(--w-v5)"></div>+5V — front face only</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-gnd)"></div>GND — back face only</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-data)"></div>Data — back face</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-clk)"></div>Clock — back face</div>
+    <div class="legend-item"><div class="swatch" style="background:#3a2c14;border:1.2px solid #c9a875"></div>220Ω resistor</div>
+  </div>
+
+  <div class="callout">
+    <b>Why this is cleaner:</b> going back to <b>P-G-D-C</b> pin order instead of flanking means Data and Clock are never
+    sandwiched between two rails — they just drop straight from the JST connector to the chip, and straight from the chip
+    to the ESP32, on one continuous face. GND only ever needs a short tap from G. The <b>only</b> thing that ever needed to
+    "cross" anything was +5V — and that's solved once, structurally, by keeping the entire +5V network (P pins, chip VCC,
+    ESP32 power) on the front face and everything else on the back. Net result: <b>zero hops, zero arches, zero heat-shrink</b>
+    anywhere on either circuit. Each Data/Clock fan wire jogs at its own dedicated row between the connectors and the chip,
+    so no two signal wires ever share a segment.
+  </div>
+
+  <div class="callout">
+    <b>Capacitors added:</b> each SN74HCT245 now has a <b>0.1µF decoupling cap</b> right next to it, bridging its VCC via
+    and local GND — small footprint, short leads, sitting as close to the chip's power pins as the layout allows. A
+    <b>1000µF+ bulk capacitor</b> sits directly at the power inlet, bridging +5V and GND right where power enters the board.
+    Like the other components that need both nets, the bulk cap's +5V lead lives on the front face and its GND lead lives
+    on the back — same via trick used throughout this layout, just applied to a passive component instead of an IC.
+  </div>
+
+  <div class="callout">
+    <b>Resistors added:</b> a <b>220Ω series resistor</b> now sits on all 12 Data/Clock lines (6 per circuit), placed on
+    the level-shifter <b>output</b> side — right after each chip's B-pin, before the long run out to the JST connector —
+    per the earlier discussion on damping fast switching edges for RF hygiene near the UWB antenna. Nothing was added on
+    the ESP32-to-chip input side, since that trace is short and doesn't need it.
+  </div>
+
+  <div class="callout">
+    <b>Spacing fix:</b> the original layout had an asymmetry — Circuit A's top gap (GND bus to JST row) was 121px, but
+    Circuit B's equivalent bottom gap had shrunk to just 11px over successive edits. Both panels have been re-extended so
+    every corresponding gap on Circuit A and Circuit B now matches exactly, keeping the whole layout visually symmetric
+    top-to-bottom around the ESP32.
+  </div>
+
+  <div class="callout">
+    <b>Chip swap — SN74HCT245 instead of 74AHCT541:</b> same HCT family (TTL-compatible, 3.3V-safe inputs), same DIP-20
+    package, same 8-channel count, so it drops into the same footprint with no resizing. The real difference: the '245 is a
+    <b>bidirectional transceiver</b>, not a one-way buffer — it has a single <b>OE</b> pin (tied to GND, always enabled, same
+    as before) plus a <b>DIR</b> pin that picks which way data flows. DIR is strapped permanently to VCC (dashed line, routed
+    through the same via as the chip's VCC pin) so the chip always drives A→B — functionally identical to the old '541's fixed
+    one-way behavior, just with one extra strap to wire per chip.
+  </div>
+
+  <div class="callout">
+    <b>Build checklist (not drawn, but still required):</b>
+    tie each chip's <b>unused inputs (A7, A8) to GND</b> — floating CMOS inputs can oscillate and waste power (unused
+    outputs B7/B8 can be left unconnected). Power inlet and bus wiring are now sized for <b>6× 1ft, 144 LED/m DotStar
+    strips at an 80%-capped brightness</b>: ~2.1A per strip, ~12.7A combined worst case. The <b>XT30 inlet and 12-14 AWG
+    bus/trunk wiring</b> shown are sized for that combined figure — but the wires from each JST connector out to its own
+    strip only carry that <b>one strip's ~2.1A</b>, so they don't need to match the heavier bus gauge; normal 20-22 AWG
+    is fine there. Worth double-checking your specific strips' own onboard JST-SM connectors too — 2.1A is close to what
+    small JST-SM pins are typically rated for, so confirm your strip's spec rather than assuming headroom.
+  </div>
+
+  <div class="note">
+    Same functionality as before: 6 strips, two SN74HCT245 level-shifting transceivers, both ESP32 header rows in use, one
+    shared +5V/GND net, single XT30 power inlet sized for the real current budget. The only real cost of this layout is that
+    a few components (JST connectors, both chips, the ESP32, the power inlet) need leads soldered on <b>both</b> faces at
+    the same holes — a bit more soldering per joint, but each joint is simpler and there's nothing to arch, insulate, or glue down.
+  </div>
+
+</body>
+</html>

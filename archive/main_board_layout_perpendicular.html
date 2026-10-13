@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Main Board Layout — Optimized for Perpendicular Power Board</title>
+<style>
+  :root {
+    --bg: #10131a;
+    --panel: #1a1e28;
+    --board: #d8c39c;
+    --board-edge: #8a7550;
+    --pad: #c48a4f;
+    --pad-dark: #8a5a2c;
+    --hole: #2a1d10;
+    --solder: #d9dde3;
+    --solder-shadow: #9aa0aa;
+    --v5: #e0393f;
+    --gnd: #4a5064;
+    --accent-a: #2f8fd6;
+    --accent-b: #ffb74d;
+    --accent-esp: #a78bfa;
+    --quiet: #3ea87a;
+    --text: #e8ecf4;
+    --muted: #98a2b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px; background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", Roboto, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  h1 { font-size: 20px; font-weight: 600; margin: 0; text-align: center; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-top: -8px; text-align: center; max-width: 740px; }
+  .board-wrap {
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 12px;
+    padding: 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  svg { display: block; }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 18px; justify-content: center;
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 10px;
+    padding: 12px 20px; font-size: 13px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .swatch { width: 22px; height: 5px; border-radius: 3px; }
+  .note { max-width: 740px; font-size: 12.5px; color: var(--muted); line-height: 1.55; text-align: center; }
+  .note b { color: var(--text); }
+  .callout {
+    max-width: 740px; font-size: 12.5px; color: var(--text); line-height: 1.55; text-align: left;
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 10px; padding: 14px 18px;
+  }
+  .callout b { color: #ffd479; }
+</style>
+</head>
+<body>
+
+  <h1>Main Board Layout — Placement Optimized for the Perpendicular Power Board</h1>
+  <div class="subtitle">Top-down view. The power board mounts at 90° against one edge. Everything on the main board is arranged so the noisiest, highest-current connections land closest to that edge, and the antenna sits as far from it as the board allows.</div>
+
+  <div class="board-wrap">
+    <svg viewBox="0 0 1000 640" width="1000" height="640">
+
+      <defs>
+        <radialGradient id="solderGlint" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="45%" stop-color="var(--solder)"/>
+          <stop offset="100%" stop-color="var(--solder-shadow)"/>
+        </radialGradient>
+        <pattern id="perf" width="20" height="20" patternUnits="userSpaceOnUse">
+          <circle cx="10" cy="10" r="4" fill="var(--pad)" stroke="var(--pad-dark)" stroke-width="0.7"/>
+          <circle cx="10" cy="10" r="1.4" fill="var(--hole)"/>
+        </pattern>
+        <radialGradient id="quietGlow" cx="50%" cy="50%" r="70%">
+          <stop offset="0%" stop-color="var(--quiet)" stop-opacity="0.85"/>
+          <stop offset="100%" stop-color="var(--quiet)" stop-opacity="0.1"/>
+        </radialGradient>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="var(--muted)"/>
+        </marker>
+      </defs>
+
+      <!-- ===== Power board, mounted at 90°, vertical orientation, on the left ===== -->
+      <rect x="60" y="60" width="140" height="500" rx="8" fill="var(--board)" stroke="var(--board-edge)" stroke-width="2"/>
+      <rect x="70" y="72" width="120" height="476" fill="url(#perf)"/>
+      <text x="130" y="45" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text)">Power Board</text>
+      <text x="130" y="90" text-anchor="middle" font-size="9.5" fill="var(--muted)" transform="rotate(90 130 90)">from earlier diagram</text>
+
+      <!-- power board's three outputs, exiting its right edge toward the main board -->
+      <circle cx="200" cy="180" r="5" fill="url(#solderGlint)"/>
+      <text x="205" y="176" font-size="9" fill="var(--accent-a)" font-weight="700">OUT A</text>
+      <circle cx="200" cy="320" r="5" fill="url(#solderGlint)"/>
+      <text x="205" y="316" font-size="9" fill="var(--accent-esp)" font-weight="700">OUT ESP</text>
+      <circle cx="200" cy="460" r="5" fill="url(#solderGlint)"/>
+      <text x="205" y="456" font-size="9" fill="var(--accent-b)" font-weight="700">OUT B</text>
+
+      <!-- ===== Main board ===== -->
+      <rect x="250" y="40" width="700" height="560" rx="10" fill="var(--board)" stroke="var(--board-edge)" stroke-width="2"/>
+      <rect x="264" y="54" width="672" height="532" fill="url(#perf)"/>
+      <text x="600" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="var(--text)">Main Board (top-down)</text>
+
+      <!-- near-edge zone label -->
+      <rect x="250" y="40" width="230" height="560" fill="#2a2010" fill-opacity="0.12"/>
+      <text x="365" y="70" text-anchor="middle" font-size="11" font-weight="700" fill="var(--accent-a)">NEAR EDGE — high-current, low RF risk</text>
+
+      <!-- JST connectors, circuit A row (top) -->
+      <g fill="#2c2c2e" stroke="#111" stroke-width="1.3">
+        <rect x="270" y="90" width="50" height="22" rx="3"/>
+        <rect x="335" y="90" width="50" height="22" rx="3"/>
+        <rect x="400" y="90" width="50" height="22" rx="3"/>
+      </g>
+      <text x="365" y="83" text-anchor="middle" font-size="9" fill="var(--accent-a)">JST 1–3 → Strips 1–3</text>
+
+      <!-- level shifter A -->
+      <rect x="290" y="130" width="150" height="34" rx="4" fill="#20242e" stroke="var(--accent-a)" stroke-width="1.5"/>
+      <text x="365" y="151" text-anchor="middle" font-size="9.5" fill="var(--text)">SN74HCT245 #1</text>
+
+      <!-- power in from board, circuit A -->
+      <line x1="200" y1="180" x2="270" y2="180" stroke="var(--v5)" stroke-width="3" marker-end="url(#arrow)"/>
+      <text x="230" y="196" text-anchor="middle" font-size="8" fill="var(--muted)">short, heavy-gauge run</text>
+
+      <!-- JST connectors, circuit B row (bottom) -->
+      <g fill="#2c2c2e" stroke="#111" stroke-width="1.3">
+        <rect x="270" y="480" width="50" height="22" rx="3"/>
+        <rect x="335" y="480" width="50" height="22" rx="3"/>
+        <rect x="400" y="480" width="50" height="22" rx="3"/>
+      </g>
+      <text x="365" y="518" text-anchor="middle" font-size="9" fill="var(--accent-b)">JST 4–6 → Strips 4–6</text>
+
+      <!-- level shifter B -->
+      <rect x="290" y="420" width="150" height="34" rx="4" fill="#20242e" stroke="var(--accent-b)" stroke-width="1.5"/>
+      <text x="365" y="441" text-anchor="middle" font-size="9.5" fill="var(--text)">SN74HCT245 #2</text>
+
+      <line x1="200" y1="460" x2="270" y2="460" stroke="var(--v5)" stroke-width="3" marker-end="url(#arrow)"/>
+      <text x="230" y="444" text-anchor="middle" font-size="8" fill="var(--muted)">short, heavy-gauge run</text>
+
+      <!-- ESP32 power (low current, still enters from near edge, routes to ESP32's connector end) -->
+      <line x1="200" y1="320" x2="480" y2="320" stroke="var(--v5)" stroke-width="2.5" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+      <text x="330" y="308" text-anchor="middle" font-size="8" fill="var(--muted)">low-current, thin wire — routed along the near edge</text>
+
+      <!-- ===== ESP32 module, spanning the middle toward the far edge ===== -->
+      <rect x="480" y="255" width="280" height="130" rx="8" fill="#20242e" stroke="var(--accent-esp)" stroke-width="2"/>
+      <text x="620" y="300" text-anchor="middle" font-size="13" font-weight="700" fill="var(--text)">ESP32 UWB Module</text>
+      <text x="620" y="318" text-anchor="middle" font-size="9.5" fill="var(--muted)">connector/header end (near)</text>
+      <text x="620" y="332" text-anchor="middle" font-size="9.5" fill="var(--muted)">→ antenna end (far) →</text>
+      <text x="490" y="370" font-size="8.5" fill="var(--muted)">5V IN + GPIO</text>
+      <text x="740" y="370" text-anchor="end" font-size="8.5" fill="var(--quiet)">antenna</text>
+
+      <!-- ===== Far edge / antenna keep-out zone ===== -->
+      <rect x="760" y="40" width="190" height="560" fill="#0f2a1f" fill-opacity="0.18"/>
+      <text x="855" y="70" text-anchor="middle" font-size="11" font-weight="700" fill="var(--quiet)">FAR EDGE — antenna keep-out</text>
+
+      <circle cx="880" cy="320" r="70" fill="url(#quietGlow)" stroke="var(--quiet)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <circle cx="880" cy="320" r="5" fill="var(--quiet)"/>
+      <text x="880" y="230" text-anchor="middle" font-size="9.5" fill="var(--quiet)" font-style="italic">~10mm min. keep-out</text>
+      <text x="880" y="243" text-anchor="middle" font-size="9.5" fill="var(--quiet)" font-style="italic">(check your module's datasheet)</text>
+      <text x="880" y="420" text-anchor="middle" font-size="9" fill="var(--muted)">no metal, no other components,</text>
+      <text x="880" y="432" text-anchor="middle" font-size="9" fill="var(--muted)">no high-current traces here</text>
+
+      <!-- distance callout -->
+      <line x1="200" y1="580" x2="880" y2="580" stroke="var(--muted)" stroke-width="1.3" marker-end="url(#arrow)"/>
+      <text x="540" y="600" text-anchor="middle" font-size="9.5" fill="var(--muted)">maximum distance the board allows — power board corner to antenna</text>
+
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="swatch" style="background:var(--accent-a)"></div>Circuit A (near edge)</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--accent-b)"></div>Circuit B (near edge)</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--accent-esp)"></div>ESP32 (spans near→far)</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--quiet)"></div>Antenna keep-out</div>
+  </div>
+
+  <div class="callout">
+    <b>The key move:</b> both JST/level-shifter clusters sit right at the edge closest to the power board — that's where
+    your two highest-current, shortest-necessary wires land, keeping those runs short and out of the antenna's way entirely.
+    The ESP32 module is placed so its <b>connector/header end</b> (5V in, GPIO to the level shifters) faces the near edge,
+    and its <b>antenna end</b> faces the far edge — using the module's own length as extra separation on top of the board's
+    own width. The low-current ESP32 power wire still enters from the near edge (matching where the power board's third
+    output already is) and routes along that same side rather than cutting across toward the antenna.
+  </div>
+
+  <div class="note">
+    This assumes your ESP32 module's antenna is at the opposite end from its power/header connections, which is true for
+    most dev boards but worth confirming against your specific Makerfabs board before finalizing hole placement. The
+    keep-out circle is illustrative — use the datasheet's real dimension once you've confirmed the antenna's exact position
+    on your board.
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ESP32 + 3x LED Strip — Soldered Protoboard</title>
+<style>
+  :root {
+    --bg: #10131a;
+    --panel: #1a1e28;
+    --board: #d8c39c;
+    --board-edge: #8a7550;
+    --pad: #c48a4f;
+    --pad-dark: #8a5a2c;
+    --hole: #2a1d10;
+    --solder: #d9dde3;
+    --solder-shadow: #9aa0aa;
+    --w-v5: #e0393f;
+    --w-gnd: #262a30;
+    --w-data: #2f8fd6;
+    --w-clk: #f2a33d;
+    --text: #e8ecf4;
+    --muted: #98a2b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Roboto, -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  h1 { font-size: 20px; font-weight: 600; margin: 0; text-align: center; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-top: -8px; text-align: center; max-width: 680px; }
+  .board-wrap {
+    background: var(--panel);
+    border: 1px solid #2a3040;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  svg { display: block; }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    justify-content: center;
+    background: var(--panel);
+    border: 1px solid #2a3040;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 13px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .swatch { width: 24px; height: 6px; border-radius: 3px; }
+  .note {
+    max-width: 680px;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.55;
+    text-align: center;
+  }
+  .note b { color: var(--text); }
+</style>
+</head>
+<body>
+
+  <h1>ESP32 → 3× LED Strip: Actual Soldered Layout</h1>
+  <div class="subtitle">Top-down view of the physical board. All wires are insulated hookup wire, soldered on one side only. The red +5V jumpers simply lie <i>over</i> the black GND bus without touching it — insulation does the work, not a second layer.</div>
+
+  <div class="board-wrap">
+    <svg viewBox="0 0 900 700" width="900" height="700">
+
+      <defs>
+        <radialGradient id="solderGlint" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="45%" stop-color="var(--solder)"/>
+          <stop offset="100%" stop-color="var(--solder-shadow)"/>
+        </radialGradient>
+        <pattern id="perf" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="4.4" fill="var(--pad)" stroke="var(--pad-dark)" stroke-width="0.8"/>
+          <circle cx="11" cy="11" r="1.6" fill="var(--hole)"/>
+        </pattern>
+      </defs>
+
+      <!-- board substrate -->
+      <rect x="20" y="20" width="860" height="500" rx="8" fill="var(--board)" stroke="var(--board-edge)" stroke-width="2"/>
+      <rect x="34" y="34" width="832" height="472" fill="url(#perf)"/>
+
+      <!-- PSU input pads -->
+      <g>
+        <rect x="34" y="70" width="66" height="50" rx="4" fill="#241a10" stroke="#4a3a24"/>
+        <text x="67" y="90" text-anchor="middle" font-size="11" fill="#e8ecf4" font-weight="700">PSU IN</text>
+        <text x="67" y="105" text-anchor="middle" font-size="10" fill="#ff9a9a">+5V</text>
+        <text x="67" y="117" text-anchor="middle" font-size="10" fill="#c9ced8">GND</text>
+      </g>
+
+      <!-- ===== SOLDERED BUS WIRES (thick insulated wire, both ends tacked to pads) ===== -->
+      <!-- +5V bus: red insulated wire straight across row -->
+      <line x1="100" y1="82" x2="860" y2="82" stroke="var(--w-v5)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="100" y1="82" x2="860" y2="82" stroke="#ff8a8a" stroke-width="1.4" opacity="0.6"/>
+      <text x="865" y="86" font-size="11" fill="var(--w-v5)" font-weight="700">+5V BUS</text>
+
+      <!-- GND bus: black insulated wire straight across row, UNDER the +5V jumper hops -->
+      <line x1="100" y1="114" x2="860" y2="114" stroke="var(--w-gnd)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="100" y1="114" x2="860" y2="114" stroke="#5a6270" stroke-width="1.4" opacity="0.6"/>
+      <text x="865" y="118" font-size="11" fill="#aab1c0" font-weight="700">GND BUS</text>
+
+      <!-- solder blobs at bus endpoints -->
+      <g>
+        <circle cx="100" cy="82" r="6" fill="url(#solderGlint)"/>
+        <circle cx="100" cy="114" r="6" fill="url(#solderGlint)"/>
+      </g>
+
+      <!-- ===== P-pin jumpers: red insulated wire, HOPS over the GND bus (visible arc, not touching) ===== -->
+      <!-- connector centers: 215, 465, 715 ; pin x offsets P=-45 G=-15 D=15 C=45 -->
+      <g fill="none" stroke="var(--w-v5)" stroke-width="5" stroke-linecap="round">
+        <path d="M 170 220 L 170 128 A 10 10 0 0 1 180 118 A 10 10 0 0 1 190 118 L 190 114 A 10 10 0 0 1 190 110 A 10 10 0 0 1 180 110 A 10 10 0 0 1 170 100 L 170 82"/>
+      </g>
+      <!-- simplified consistent hop for all three using a reusable path shape -->
+      <g fill="none" stroke="var(--w-v5)" stroke-width="5" stroke-linecap="round">
+        <path d="M 420 220 L 420 128 A 9 9 0 0 1 438 128 L 438 82"/>
+        <path d="M 670 220 L 670 128 A 9 9 0 0 1 688 128 L 688 82"/>
+      </g>
+      <!-- redo pin1 the same clean way (overwrite messy first path visually by drawing board-colored mask underneath is unnecessary; keep simple) -->
+      <g fill="none" stroke="var(--w-v5)" stroke-width="5" stroke-linecap="round">
+        <path d="M 170 220 L 170 128 A 9 9 0 0 1 188 128 L 188 82"/>
+      </g>
+
+      <!-- little highlight on each hop to read as "wire arching over," plus small gap under it in the GND bus to show clearance -->
+      <g stroke="var(--board)" stroke-width="8" fill="none">
+        <line x1="180" y1="114" x2="196" y2="114"/>
+        <line x1="430" y1="114" x2="446" y2="114"/>
+        <line x1="680" y1="114" x2="696" y2="114"/>
+      </g>
+      <g stroke="var(--w-gnd)" stroke-width="6" stroke-linecap="round">
+        <line x1="182" y1="114" x2="194" y2="114" opacity="0"/>
+      </g>
+      <g font-size="9" fill="var(--w-v5)" text-anchor="middle" font-style="italic">
+        <text x="185" y="135">hop</text>
+        <text x="435" y="135">hop</text>
+        <text x="685" y="135">hop</text>
+      </g>
+
+      <!-- solder blobs where P wire lands on +5V bus -->
+      <g fill="url(#solderGlint)">
+        <circle cx="170" cy="82" r="5.5"/>
+        <circle cx="420" cy="82" r="5.5"/>
+        <circle cx="670" cy="82" r="5.5"/>
+      </g>
+
+      <!-- ===== G-pin jumpers: black insulated wire, straight down to GND bus ===== -->
+      <g stroke="var(--w-gnd)" stroke-width="5" stroke-linecap="round">
+        <line x1="200" y1="220" x2="200" y2="114"/>
+        <line x1="450" y1="220" x2="450" y2="114"/>
+        <line x1="700" y1="220" x2="700" y2="114"/>
+      </g>
+      <g fill="url(#solderGlint)">
+        <circle cx="200" cy="114" r="5.5"/>
+        <circle cx="450" cy="114" r="5.5"/>
+        <circle cx="700" cy="114" r="5.5"/>
+      </g>
+
+      <!-- ===== JST connector housings, soldered onto the board ===== -->
+      <g>
+        <rect x="155" y="205" width="120" height="30" rx="4" fill="#2c2c2e" stroke="#111" stroke-width="1.5"/>
+        <rect x="405" y="205" width="120" height="30" rx="4" fill="#2c2c2e" stroke="#111" stroke-width="1.5"/>
+        <rect x="655" y="205" width="120" height="30" rx="4" fill="#2c2c2e" stroke="#111" stroke-width="1.5"/>
+      </g>
+      <g font-size="11" fill="#3a2c14" text-anchor="middle" font-weight="700">
+        <text x="215" y="200">JST-1 → Strip 1</text>
+        <text x="465" y="200">JST-2 → Strip 2</text>
+        <text x="715" y="200">JST-3 → Strip 3</text>
+      </g>
+
+      <!-- pin solder joints + labels -->
+      <g font-size="10" text-anchor="middle" font-weight="600">
+        <!-- connector 1 -->
+        <circle cx="170" cy="222" r="5" fill="url(#solderGlint)"/>
+        <circle cx="200" cy="222" r="5" fill="url(#solderGlint)"/>
+        <circle cx="230" cy="222" r="5" fill="url(#solderGlint)"/>
+        <circle cx="260" cy="222" r="5" fill="url(#solderGlint)"/>
+        <text x="170" y="253" fill="var(--w-v5)">P</text>
+        <text x="200" y="253" fill="#5a6270">G</text>
+        <text x="230" y="253" fill="var(--w-data)">D1</text>
+        <text x="260" y="253" fill="var(--w-clk)">C1</text>
+
+        <!-- connector 2 -->
+        <circle cx="420" cy="222" r="5" fill="url(#solderGlint)"/>
+        <circle cx="450" cy="222" r="5" fill="url(#solderGlint)"/>
+        <circle cx="480" cy="222" r="5" fill="url(#solderGlint)"/>
+        <circle cx="510" cy="222" r="5" fill="url(#solderGlint)"/>
+        <text x="420" y="253" fill="var(--w-v5)">P</text>
+        <text x="450" y="253" fill="#5a6270">G</text>
+        <text x="480" y="253" fill="var(--w-data)">D2</text>
+        <text x="510" y="253" fill="var(--w-clk)">C2</text>
+
+        <!-- connector 3 -->
+        <circle cx="670" cy="222" r="5" fill="url(#solderGlint)"/>
+        <circle cx="700" cy="222" r="5" fill="url(#solderGlint)"/>
+        <circle cx="730" cy="222" r="5" fill="url(#solderGlint)"/>
+        <circle cx="760" cy="222" r="5" fill="url(#solderGlint)"/>
+        <text x="670" y="253" fill="var(--w-v5)">P</text>
+        <text x="700" y="253" fill="#5a6270">G</text>
+        <text x="730" y="253" fill="var(--w-data)">D3</text>
+        <text x="760" y="253" fill="var(--w-clk)">C3</text>
+      </g>
+
+      <!-- Data / Clock insulated wires straight down to ESP32 -->
+      <g stroke-width="5" fill="none" stroke-linecap="round">
+        <line x1="230" y1="222" x2="230" y2="470" stroke="var(--w-data)"/>
+        <line x1="260" y1="222" x2="260" y2="470" stroke="var(--w-clk)"/>
+        <line x1="480" y1="222" x2="480" y2="470" stroke="var(--w-data)"/>
+        <line x1="510" y1="222" x2="510" y2="470" stroke="var(--w-clk)"/>
+        <line x1="730" y1="222" x2="730" y2="470" stroke="var(--w-data)"/>
+        <line x1="760" y1="222" x2="760" y2="470" stroke="var(--w-clk)"/>
+      </g>
+
+      <!-- ESP32 module -->
+      <rect x="170" y="470" width="640" height="42" rx="6" fill="#20242e" stroke="#0e1015" stroke-width="1.5"/>
+      <text x="490" y="496" text-anchor="middle" font-size="12" font-weight="700" fill="#e8ecf4">ESP32 (pin header, solder side)</text>
+
+      <g fill="url(#solderGlint)">
+        <circle cx="230" cy="470" r="5"/>
+        <circle cx="260" cy="470" r="5"/>
+        <circle cx="480" cy="470" r="5"/>
+        <circle cx="510" cy="470" r="5"/>
+        <circle cx="730" cy="470" r="5"/>
+        <circle cx="760" cy="470" r="5"/>
+      </g>
+
+      <text x="450" y="530" text-anchor="middle" font-size="10.5" fill="#3a2c14">
+        ESP32 GND pin also lands on the black GND bus (short jumper, not pictured for clarity)
+      </text>
+
+      <!-- ================= CROSS-SECTION INSET ================= -->
+      <g transform="translate(560,545)">
+        <rect x="0" y="0" width="300" height="130" rx="8" fill="var(--panel)" stroke="#2a3040"/>
+        <text x="150" y="20" text-anchor="middle" font-size="11.5" fill="var(--text)" font-weight="700">Side view — why one side is enough</text>
+
+        <!-- board slab -->
+        <rect x="20" y="80" width="260" height="14" fill="var(--board)" stroke="var(--board-edge)"/>
+        <text x="150" y="112" text-anchor="middle" font-size="9.5" fill="var(--muted)">protoboard substrate</text>
+
+        <!-- GND bus flat on the board -->
+        <rect x="40" y="72" width="220" height="6" rx="3" fill="var(--w-gnd)"/>
+        <text x="40" y="65" font-size="9" fill="#aab1c0">GND bus (flat on pads)</text>
+
+        <!-- P jumper arching over, insulation shown as a distinct outline -->
+        <path d="M 60 80 C 100 20, 200 20, 240 80" fill="none" stroke="var(--w-v5)" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 60 80 C 100 20, 200 20, 240 80" fill="none" stroke="#ff9a9a" stroke-width="1.2" opacity="0.7"/>
+        <text x="150" y="28" text-anchor="middle" font-size="9" fill="var(--w-v5)">insulated +5V jumper arches clear</text>
+
+        <circle cx="60" cy="80" r="3.5" fill="url(#solderGlint)"/>
+        <circle cx="240" cy="80" r="3.5" fill="url(#solderGlint)"/>
+      </g>
+
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="swatch" style="background:var(--w-v5)"></div>+5V (insulated red wire)</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-gnd)"></div>GND (insulated black wire)</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-data)"></div>Data (unique per strip)</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-clk)"></div>Clock (unique per strip)</div>
+  </div>
+
+  <div class="note">
+    Every wire here is ordinary <b>insulated hookup wire</b>, soldered only on the component/top side — no back-side soldering needed.
+    The red +5V jumpers physically pass over the black GND bus (see the "hop" and the side-view inset), but the wire's own insulation
+    keeps them from touching. This is standard practice on single-sided perfboard: whichever line has to cross another gets insulated
+    wire, and the rest of the layout — bus rails, straight Data/Clock drops — stays exactly as clean as the schematic version.
+  </div>
+
+</body>
+</html>

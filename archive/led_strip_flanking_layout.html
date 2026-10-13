@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Alternate Layout — P/G Flanking, D/C Jump the GND Rail</title>
+<style>
+  :root {
+    --bg: #10131a;
+    --panel: #1a1e28;
+    --board: #d8c39c;
+    --board-edge: #8a7550;
+    --pad: #c48a4f;
+    --pad-dark: #8a5a2c;
+    --hole: #2a1d10;
+    --solder: #d9dde3;
+    --solder-shadow: #9aa0aa;
+    --w-v5: #e0393f;
+    --w-gnd: #262a30;
+    --w-data: #2f8fd6;
+    --w-clk: #f2a33d;
+    --text: #e8ecf4;
+    --muted: #98a2b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px; background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", Roboto, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  h1 { font-size: 20px; font-weight: 600; margin: 0; text-align: center; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-top: -8px; text-align: center; max-width: 700px; }
+  .board-wrap {
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 12px;
+    padding: 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  svg { display: block; }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 18px; justify-content: center;
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 10px;
+    padding: 12px 20px; font-size: 13px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .swatch { width: 24px; height: 6px; border-radius: 3px; }
+  .note { max-width: 700px; font-size: 12.5px; color: var(--muted); line-height: 1.55; text-align: center; }
+  .note b { color: var(--text); }
+  .callout {
+    max-width: 700px; font-size: 12.5px; color: var(--text); line-height: 1.55; text-align: left;
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 10px; padding: 14px 18px;
+  }
+  .callout b { color: #ffd479; }
+</style>
+</head>
+<body>
+
+  <h1>Alternate Layout: Power/Ground Flanking the Connector</h1>
+  <div class="subtitle">P taps straight up to the +5V rail, G taps straight down to the GND rail — zero-length, dead simple. The cost: Data and Clock now sit sandwiched between them and have to hop the GND rail to reach the ESP32.</div>
+
+  <div class="board-wrap">
+    <svg viewBox="0 0 900 620" width="900" height="620">
+
+      <defs>
+        <radialGradient id="solderGlint" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="45%" stop-color="var(--solder)"/>
+          <stop offset="100%" stop-color="var(--solder-shadow)"/>
+        </radialGradient>
+        <pattern id="perf" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="4.4" fill="var(--pad)" stroke="var(--pad-dark)" stroke-width="0.8"/>
+          <circle cx="11" cy="11" r="1.6" fill="var(--hole)"/>
+        </pattern>
+      </defs>
+
+      <rect x="20" y="20" width="860" height="560" rx="8" fill="var(--board)" stroke="var(--board-edge)" stroke-width="2"/>
+      <rect x="34" y="34" width="832" height="532" fill="url(#perf)"/>
+
+      <!-- ===== +5V bus (top) ===== -->
+      <line x1="100" y1="70" x2="860" y2="70" stroke="var(--w-v5)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="100" y1="70" x2="860" y2="70" stroke="#ff8a8a" stroke-width="1.2" opacity="0.6"/>
+      <text x="865" y="74" font-size="11" fill="var(--w-v5)" font-weight="700">+5V BUS</text>
+      <circle cx="100" cy="70" r="6" fill="url(#solderGlint)"/>
+      <rect x="34" y="50" width="60" height="34" rx="4" fill="#241a10" stroke="#4a3a24"/>
+      <text x="64" y="71" text-anchor="middle" font-size="9.5" fill="#ff9a9a" font-weight="700">PSU +5V</text>
+
+      <!-- Column groups: each connector's 4 pins stacked vertically: P, D, C, G -->
+      <!-- Connector 1: x=215  Connector 2: x=465  Connector 3: x=715 -->
+      <!-- P at y=140, D at y=185, C at y=230, G at y=275 -->
+
+      <g font-size="11" font-weight="700" text-anchor="middle" fill="#3a2c14">
+        <text x="215" y="120">JST-1 → Strip 1</text>
+        <text x="465" y="120">JST-2 → Strip 2</text>
+        <text x="715" y="120">JST-3 → Strip 3</text>
+      </g>
+
+      <!-- connector housings, drawn as a small vertical strain-relief block behind the 4 stacked pins -->
+      <g fill="#2c2c2e" stroke="#111" stroke-width="1.5">
+        <rect x="197" y="130" width="36" height="155" rx="6"/>
+        <rect x="447" y="130" width="36" height="155" rx="6"/>
+        <rect x="697" y="130" width="36" height="155" rx="6"/>
+      </g>
+
+      <!-- P pins: zero/short stub straight up to +5V bus -->
+      <g stroke="var(--w-v5)" stroke-width="5" stroke-linecap="round">
+        <line x1="215" y1="140" x2="215" y2="70"/>
+        <line x1="465" y1="140" x2="465" y2="70"/>
+        <line x1="715" y1="140" x2="715" y2="70"/>
+      </g>
+      <g fill="url(#solderGlint)">
+        <circle cx="215" cy="70" r="5.5"/><circle cx="215" cy="140" r="5.5"/>
+        <circle cx="465" cy="70" r="5.5"/><circle cx="465" cy="140" r="5.5"/>
+        <circle cx="715" cy="70" r="5.5"/><circle cx="715" cy="140" r="5.5"/>
+      </g>
+
+      <!-- pin labels -->
+      <g font-size="10" font-weight="700" text-anchor="start">
+        <text x="238" y="144" fill="var(--w-v5)">P</text>
+        <text x="238" y="189" fill="var(--w-data)">D</text>
+        <text x="238" y="234" fill="var(--w-clk)">C</text>
+        <text x="238" y="279" fill="#c9ced8">G</text>
+
+        <text x="488" y="144" fill="var(--w-v5)">P</text>
+        <text x="488" y="189" fill="var(--w-data)">D</text>
+        <text x="488" y="234" fill="var(--w-clk)">C</text>
+        <text x="488" y="279" fill="#c9ced8">G</text>
+
+        <text x="738" y="144" fill="var(--w-v5)">P</text>
+        <text x="738" y="189" fill="var(--w-data)">D</text>
+        <text x="738" y="234" fill="var(--w-clk)">C</text>
+        <text x="738" y="279" fill="#c9ced8">G</text>
+      </g>
+
+      <!-- D/C solder points at the connector -->
+      <g fill="url(#solderGlint)">
+        <circle cx="215" cy="185" r="5"/><circle cx="215" cy="230" r="5"/>
+        <circle cx="465" cy="185" r="5"/><circle cx="465" cy="230" r="5"/>
+        <circle cx="715" cy="185" r="5"/><circle cx="715" cy="230" r="5"/>
+      </g>
+
+      <!-- G pins: straight down to GND bus -->
+      <g stroke="var(--w-gnd)" stroke-width="5" stroke-linecap="round">
+        <line x1="215" y1="275" x2="215" y2="330"/>
+        <line x1="465" y1="275" x2="465" y2="330"/>
+        <line x1="715" y1="275" x2="715" y2="330"/>
+      </g>
+      <g fill="url(#solderGlint)">
+        <circle cx="215" cy="275" r="5.5"/><circle cx="215" cy="330" r="5.5"/>
+        <circle cx="465" cy="275" r="5.5"/><circle cx="465" cy="330" r="5.5"/>
+        <circle cx="715" cy="275" r="5.5"/><circle cx="715" cy="330" r="5.5"/>
+      </g>
+
+      <!-- ===== GND bus (below connectors — this is what D/C must jump) ===== -->
+      <!-- drawn with small gaps to let D/C hop arcs read cleanly -->
+      <g stroke="var(--w-gnd)" stroke-width="6" stroke-linecap="round">
+        <line x1="100" y1="330" x2="190" y2="330"/>
+        <line x1="240" y1="330" x2="440" y2="330"/>
+        <line x1="490" y1="330" x2="690" y2="330"/>
+        <line x1="740" y1="330" x2="860" y2="330"/>
+      </g>
+      <text x="865" y="334" font-size="11" fill="#aab1c0" font-weight="700">GND BUS</text>
+      <rect x="34" y="313" width="60" height="34" rx="4" fill="#241a10" stroke="#4a3a24"/>
+      <text x="64" y="334" text-anchor="middle" font-size="9.5" fill="#c9ced8" font-weight="700">PSU GND</text>
+
+      <!-- D/C hop arcs over the GND bus -->
+      <g fill="none" stroke-linecap="round">
+        <path d="M 200 230 L 200 300 A 9 9 0 0 1 218 300 L 218 500" stroke="var(--w-data)" stroke-width="5"/>
+        <path d="M 230 230 L 230 315 A 9 9 0 0 1 248 315 L 248 500" stroke="var(--w-clk)" stroke-width="5"/>
+
+        <path d="M 450 230 L 450 300 A 9 9 0 0 1 468 300 L 468 500" stroke="var(--w-data)" stroke-width="5"/>
+        <path d="M 480 230 L 480 315 A 9 9 0 0 1 498 315 L 498 500" stroke="var(--w-clk)" stroke-width="5"/>
+
+        <path d="M 700 230 L 700 300 A 9 9 0 0 1 718 300 L 718 500" stroke="var(--w-data)" stroke-width="5"/>
+        <path d="M 730 230 L 730 315 A 9 9 0 0 1 748 315 L 748 500" stroke="var(--w-clk)" stroke-width="5"/>
+      </g>
+      <g font-size="9" fill="var(--w-data)" text-anchor="middle" font-style="italic">
+        <text x="209" y="295">hop</text>
+        <text x="459" y="295">hop</text>
+        <text x="709" y="295">hop</text>
+      </g>
+      <g font-size="9" fill="var(--w-clk)" text-anchor="middle" font-style="italic">
+        <text x="239" y="310">hop</text>
+        <text x="489" y="310">hop</text>
+        <text x="739" y="310">hop</text>
+      </g>
+
+      <!-- redirect D/C lines cleanly down to ESP32 header (straighten below the hop) -->
+      <g fill="url(#solderGlint)">
+        <circle cx="218" cy="500" r="5"/><circle cx="248" cy="500" r="5"/>
+        <circle cx="468" cy="500" r="5"/><circle cx="498" cy="500" r="5"/>
+        <circle cx="718" cy="500" r="5"/><circle cx="748" cy="500" r="5"/>
+      </g>
+
+      <!-- ESP32 -->
+      <rect x="170" y="500" width="620" height="42" rx="6" fill="#20242e" stroke="#0e1015" stroke-width="1.5"/>
+      <text x="480" y="525" text-anchor="middle" font-size="12" font-weight="700" fill="#e8ecf4">ESP32</text>
+
+      <g font-size="9.5" text-anchor="middle" fill="var(--muted)">
+        <text x="218" y="558">D1</text><text x="248" y="558">C1</text>
+        <text x="468" y="558">D2</text><text x="498" y="558">C2</text>
+        <text x="718" y="558">D3</text><text x="748" y="558">C3</text>
+      </g>
+
+      <!-- ESP32 GND tie-in to the GND bus for common ground -->
+      <path d="M 790 500 L 790 350 A 8 8 0 0 1 800 342 L 815 342 A 8 8 0 0 1 823 334 L 823 330"
+            fill="none" stroke="var(--w-gnd)" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="790" cy="500" r="5" fill="url(#solderGlint)"/>
+      <circle cx="823" cy="330" r="5.5" fill="url(#solderGlint)"/>
+      <text x="790" y="493" text-anchor="middle" font-size="9" fill="#c9ced8" font-weight="700">GND</text>
+
+      <text x="480" y="585" text-anchor="middle" font-size="10.5" fill="#5a4a30" font-style="italic">
+        Every Data and Clock line must hop the GND bus once — 6 hops total, vs. 3 (or zero) in the earlier layouts
+      </text>
+
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="swatch" style="background:var(--w-v5)"></div>+5V — top rail</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-gnd)"></div>GND — bottom rail (in the way)</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-data)"></div>Data — must hop</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-clk)"></div>Clock — must hop</div>
+  </div>
+
+  <div class="callout">
+    <b>Worth knowing before you commit to this one:</b> flanking P and G on the outside of each connector does make the power
+    wiring about as simple as it can get — both land directly on their bus with a short, direct stub, no routing decisions to make.
+    But because Data and Clock are sandwiched in the middle, they're now boxed in — the GND bus sits physically between them and
+    the ESP32, so <b>every single one</b> of the 6 data/clock wires has to hop over it. That's double the number of hops compared
+    to the original layout (where only the 3 P-jumpers needed to hop), and hops are exactly the kind of thing that gets fragile
+    if the board gets bumped or flexed later.
+  </div>
+
+  <div class="note">
+    If you like this pin arrangement but want to avoid the hops, the front/back trick still applies here: put the GND bus and
+    its 3 short G-jumpers entirely on the <b>back</b> of the board, and run the 6 Data/Clock lines on the <b>front</b> instead
+    (the +5V bus and P-jumpers can live on either face, since P never conflicts with anything). Same pin order, same "flanking"
+    look, zero hops.
+  </div>
+
+</body>
+</html>

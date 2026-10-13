@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Power Distribution Protoboard — Top Input, Edge-Mounted Outputs</title>
+<style>
+  :root {
+    --bg: #10131a;
+    --panel: #1a1e28;
+    --board: #d8c39c;
+    --board-edge: #8a7550;
+    --pad: #c48a4f;
+    --pad-dark: #8a5a2c;
+    --hole: #2a1d10;
+    --solder: #d9dde3;
+    --solder-shadow: #9aa0aa;
+    --raw: #b8433f;
+    --v5: #e0393f;
+    --gnd: #4a5064;
+    --accent-a: #2f8fd6;
+    --accent-b: #ffb74d;
+    --accent-esp: #a78bfa;
+    --text: #e8ecf4;
+    --muted: #98a2b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px; background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", Roboto, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  h1 { font-size: 20px; font-weight: 600; margin: 0; text-align: center; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-top: -8px; text-align: center; max-width: 720px; }
+  .board-wrap {
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 12px;
+    padding: 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  svg { display: block; }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 18px; justify-content: center;
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 10px;
+    padding: 12px 20px; font-size: 13px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .swatch { width: 22px; height: 5px; border-radius: 3px; }
+  .note { max-width: 720px; font-size: 12.5px; color: var(--muted); line-height: 1.55; text-align: center; }
+  .note b { color: var(--text); }
+</style>
+</head>
+<body>
+
+  <h1>Power Distribution Protoboard</h1>
+  <div class="subtitle">Battery input enters from the top edge. All three outputs — two XT30 for the LED circuits, one JST for the ESP32 — sit in a row right at the bottom edge, ready to route straight off the board.</div>
+
+  <div class="board-wrap">
+    <svg viewBox="0 0 900 580" width="900" height="580">
+
+      <defs>
+        <radialGradient id="solderGlint" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="45%" stop-color="var(--solder)"/>
+          <stop offset="100%" stop-color="var(--solder-shadow)"/>
+        </radialGradient>
+        <pattern id="perf" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="4.4" fill="var(--pad)" stroke="var(--pad-dark)" stroke-width="0.8"/>
+          <circle cx="11" cy="11" r="1.6" fill="var(--hole)"/>
+        </pattern>
+      </defs>
+
+      <!-- ===== Board ===== -->
+      <rect x="20" y="40" width="860" height="480" rx="10" fill="var(--board)" stroke="var(--board-edge)" stroke-width="2"/>
+      <rect x="34" y="54" width="832" height="452" fill="url(#perf)"/>
+
+      <!-- ===== Battery input, top edge, protruding above the board ===== -->
+      <rect x="415" y="2" width="70" height="38" rx="4" fill="#2c2c2e" stroke="#111" stroke-width="1.5"/>
+      <text x="450" y="30" text-anchor="middle" font-size="10" fill="var(--text)" font-weight="700">XT30 IN</text>
+      <circle cx="435" cy="40" r="4.5" fill="url(#solderGlint)"/>
+      <circle cx="465" cy="40" r="4.5" fill="url(#solderGlint)"/>
+      <text x="418" y="16" text-anchor="middle" font-size="8.5" fill="var(--raw)" font-weight="700">+</text>
+      <text x="482" y="16" text-anchor="middle" font-size="8.5" fill="var(--gnd)" font-weight="700">−</text>
+
+      <!-- fuse on the + line, just inside the board -->
+      <line x1="435" y1="40" x2="435" y2="60" stroke="var(--raw)" stroke-width="4"/>
+      <rect x="418" y="60" width="34" height="16" rx="3" fill="#3a2c14" stroke="#c9a875" stroke-width="1.2"/>
+      <text x="435" y="72" text-anchor="middle" font-size="8" fill="#e8d9b8">FUSE</text>
+      <text x="470" y="72" text-anchor="middle" font-size="8.5" fill="var(--raw)" font-weight="700">15A</text>
+      <line x1="435" y1="76" x2="435" y2="100" stroke="var(--raw)" stroke-width="4"/>
+
+      <!-- GND from battery down a clear lane on the right, all the way to the GND bus near the bottom -->
+      <path d="M 465 40 L 465 60 L 800 60 L 800 400" fill="none" stroke="var(--gnd)" stroke-width="3.5"/>
+
+      <!-- ===== Raw +7.4V bus ===== -->
+      <line x1="100" y1="100" x2="800" y2="100" stroke="var(--raw)" stroke-width="6" stroke-linecap="round"/>
+      <text x="805" y="104" font-size="10.5" fill="var(--raw)" font-weight="700">RAW +7.4V BUS</text>
+      <text x="805" y="117" font-size="8" fill="var(--muted)" font-style="italic">unregulated — battery voltage</text>
+      <circle cx="435" cy="100" r="5" fill="url(#solderGlint)"/>
+
+      <!-- ===== GND bus, near the bottom, above the output row ===== -->
+      <line x1="100" y1="400" x2="800" y2="400" stroke="var(--gnd)" stroke-width="6" stroke-linecap="round"/>
+      <text x="805" y="404" font-size="10.5" fill="var(--gnd)" font-weight="700">COMMON GND BUS</text>
+      <circle cx="800" cy="400" r="5" fill="url(#solderGlint)"/>
+
+      <!-- ===== UBEC A ===== -->
+      <rect x="200" y="150" width="120" height="60" rx="6" fill="#20242e" stroke="var(--accent-a)" stroke-width="2"/>
+      <text x="260" y="175" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text)">UBEC A</text>
+      <text x="260" y="191" text-anchor="middle" font-size="9" fill="var(--muted)">8A cont., 5V out</text>
+      <line x1="230" y1="150" x2="230" y2="100" stroke="var(--raw)" stroke-width="3"/>
+      <circle cx="230" cy="150" r="4" fill="url(#solderGlint)"/>
+      <line x1="290" y1="210" x2="290" y2="400" stroke="var(--gnd)" stroke-width="3"/>
+      <circle cx="290" cy="210" r="4" fill="url(#solderGlint)"/>
+
+      <line x1="260" y1="210" x2="260" y2="245" stroke="var(--v5)" stroke-width="3"/>
+      <circle cx="260" cy="252" r="9" fill="#20242e" stroke="var(--v5)" stroke-width="1.3"/>
+      <line x1="255" y1="245" x2="265" y2="245" stroke="var(--v5)" stroke-width="1.2"/>
+      <text x="278" y="256" font-size="7.5" fill="var(--muted)">bulk cap</text>
+      <line x1="260" y1="261" x2="260" y2="380" stroke="var(--v5)" stroke-width="3"/>
+
+      <!-- ===== Small BEC (ESP32) ===== -->
+      <rect x="400" y="150" width="120" height="60" rx="6" fill="#20242e" stroke="var(--accent-esp)" stroke-width="2"/>
+      <text x="460" y="175" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text)">Small BEC</text>
+      <text x="460" y="191" text-anchor="middle" font-size="9" fill="var(--muted)">1-2A, 5V out</text>
+      <line x1="430" y1="150" x2="430" y2="100" stroke="var(--raw)" stroke-width="3"/>
+      <circle cx="430" cy="150" r="4" fill="url(#solderGlint)"/>
+      <line x1="490" y1="210" x2="490" y2="400" stroke="var(--gnd)" stroke-width="3"/>
+      <circle cx="490" cy="210" r="4" fill="url(#solderGlint)"/>
+
+      <line x1="460" y1="210" x2="460" y2="245" stroke="var(--v5)" stroke-width="3"/>
+      <circle cx="460" cy="251" r="7" fill="#20242e" stroke="var(--v5)" stroke-width="1.2"/>
+      <line x1="456" y1="246" x2="464" y2="246" stroke="var(--v5)" stroke-width="1.1"/>
+      <text x="475" y="255" font-size="7.5" fill="var(--muted)">decoupling</text>
+      <line x1="460" y1="258" x2="460" y2="380" stroke="var(--v5)" stroke-width="3"/>
+
+      <!-- ===== UBEC B ===== -->
+      <rect x="580" y="150" width="120" height="60" rx="6" fill="#20242e" stroke="var(--accent-b)" stroke-width="2"/>
+      <text x="640" y="175" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text)">UBEC B</text>
+      <text x="640" y="191" text-anchor="middle" font-size="9" fill="var(--muted)">8A cont., 5V out</text>
+      <line x1="610" y1="150" x2="610" y2="100" stroke="var(--raw)" stroke-width="3"/>
+      <circle cx="610" cy="150" r="4" fill="url(#solderGlint)"/>
+      <line x1="670" y1="210" x2="670" y2="400" stroke="var(--gnd)" stroke-width="3"/>
+      <circle cx="670" cy="210" r="4" fill="url(#solderGlint)"/>
+
+      <line x1="640" y1="210" x2="640" y2="245" stroke="var(--v5)" stroke-width="3"/>
+      <circle cx="640" cy="252" r="9" fill="#20242e" stroke="var(--v5)" stroke-width="1.3"/>
+      <line x1="635" y1="245" x2="645" y2="245" stroke="var(--v5)" stroke-width="1.2"/>
+      <text x="658" y="256" font-size="7.5" fill="var(--muted)">bulk cap</text>
+      <line x1="640" y1="261" x2="640" y2="380" stroke="var(--v5)" stroke-width="3"/>
+
+      <!-- ===== Output row, horizontal, right at the bottom edge ===== -->
+      <text x="450" y="418" text-anchor="middle" font-size="9.5" fill="#5a4a30" font-style="italic">
+        Outputs below are electrically separate from each other — only GND is shared
+      </text>
+
+      <!-- XT30 OUT A -->
+      <rect x="230" y="500" width="60" height="40" rx="4" fill="#2c2c2e" stroke="var(--accent-a)" stroke-width="1.5"/>
+      <text x="260" y="435" text-anchor="middle" font-size="10" fill="var(--accent-a)" font-weight="700">XT30 OUT A</text>
+      <line x1="260" y1="380" x2="260" y2="500" stroke="var(--v5)" stroke-width="3"/>
+      <circle cx="260" cy="500" r="4.5" fill="url(#solderGlint)"/>
+      <line x1="284" y1="400" x2="284" y2="500" stroke="var(--gnd)" stroke-width="2.5"/>
+      <circle cx="284" cy="400" r="4" fill="url(#solderGlint)"/>
+      <circle cx="284" cy="500" r="4.5" fill="url(#solderGlint)"/>
+      <text x="260" y="555" text-anchor="middle" font-size="8.5" fill="var(--muted)">→ Circuit A (~6.35A)</text>
+
+      <!-- JST OUT ESP -->
+      <rect x="440" y="500" width="40" height="36" rx="4" fill="#2c2c2e" stroke="var(--accent-esp)" stroke-width="1.5"/>
+      <text x="460" y="435" text-anchor="middle" font-size="10" fill="var(--accent-esp)" font-weight="700">JST OUT ESP</text>
+      <line x1="460" y1="380" x2="460" y2="500" stroke="var(--v5)" stroke-width="3"/>
+      <circle cx="460" cy="500" r="4" fill="url(#solderGlint)"/>
+      <line x1="480" y1="400" x2="480" y2="500" stroke="var(--gnd)" stroke-width="2.5"/>
+      <circle cx="480" cy="400" r="4" fill="url(#solderGlint)"/>
+      <circle cx="480" cy="500" r="4" fill="url(#solderGlint)"/>
+      <text x="460" y="551" text-anchor="middle" font-size="8.5" fill="var(--muted)">→ ESP32 (~1-2A)</text>
+
+      <!-- XT30 OUT B -->
+      <rect x="610" y="500" width="60" height="40" rx="4" fill="#2c2c2e" stroke="var(--accent-b)" stroke-width="1.5"/>
+      <text x="640" y="435" text-anchor="middle" font-size="10" fill="var(--accent-b)" font-weight="700">XT30 OUT B</text>
+      <line x1="640" y1="380" x2="640" y2="500" stroke="var(--v5)" stroke-width="3"/>
+      <circle cx="640" cy="500" r="4.5" fill="url(#solderGlint)"/>
+      <line x1="664" y1="400" x2="664" y2="500" stroke="var(--gnd)" stroke-width="2.5"/>
+      <circle cx="664" cy="400" r="4" fill="url(#solderGlint)"/>
+      <circle cx="664" cy="500" r="4.5" fill="url(#solderGlint)"/>
+      <text x="640" y="555" text-anchor="middle" font-size="8.5" fill="var(--muted)">→ Circuit B (~6.35A)</text>
+
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="swatch" style="background:var(--raw)"></div>Raw +7.4V (unregulated)</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--v5)"></div>Regulated +5V (per branch, isolated)</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--gnd)"></div>Common GND</div>
+  </div>
+
+  <div class="note">
+    <b>Layout logic:</b> power enters from the top, flows down through the fuse onto the raw bus, branches into the three
+    regulators, and exits as three separate, edge-mounted connectors along the bottom — a straight top-to-bottom flow with
+    the outputs positioned right where you'd route cables off the board toward the main protoboard. As before, the three
+    +5V outputs are electrically isolated from each other — only GND ties them together — and the battery's balance lead
+    never touches this board, only its main power lead does.
+  </div>
+
+</body>
+</html>

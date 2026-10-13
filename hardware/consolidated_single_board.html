@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Consolidated Single Board — 3 Strips, Integrated Power, Near/Far Edge Placement</title>
+<style>
+  :root {
+    --bg: #10131a;
+    --panel: #1a1e28;
+    --board: #d8c39c;
+    --board-edge: #8a7550;
+    --pad: #c48a4f;
+    --pad-dark: #8a5a2c;
+    --hole: #2a1d10;
+    --solder: #d9dde3;
+    --solder-shadow: #9aa0aa;
+    --raw: #b8433f;
+    --v5: #e0393f;
+    --gnd: #4a5064;
+    --w-data: #2f8fd6;
+    --w-clk: #f2a33d;
+    --w-esp5: #a78bfa;
+    --quiet: #3ea87a;
+    --text: #e8ecf4;
+    --muted: #98a2b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px; background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", Roboto, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  h1 { font-size: 20px; font-weight: 600; margin: 0; text-align: center; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-top: -8px; text-align: center; max-width: 760px; }
+  .board-wrap {
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 12px;
+    padding: 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  svg { display: block; }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 18px; justify-content: center;
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 10px;
+    padding: 12px 20px; font-size: 13px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .swatch { width: 22px; height: 5px; border-radius: 3px; }
+  .note { max-width: 760px; font-size: 12.5px; color: var(--muted); line-height: 1.55; text-align: center; }
+  .note b { color: var(--text); }
+  .callout {
+    max-width: 760px; font-size: 12.5px; color: var(--text); line-height: 1.55; text-align: left;
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 10px; padding: 14px 18px;
+  }
+  .callout b { color: #ffd479; }
+  .audit-section {
+    width: 100%; max-width: 900px; margin-top: 12px;
+    background: var(--panel); border: 1px solid #2a3040; border-radius: 12px;
+    padding: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .audit-section h2 {
+    font-size: 17px; font-weight: 700; color: var(--text); margin: 28px 0 10px 0;
+    border-bottom: 1px solid #2a3040; padding-bottom: 6px;
+  }
+  .audit-section h2:first-child { margin-top: 0; }
+  .audit-section h3 { font-size: 13.5px; font-weight: 700; color: #ffd479; margin: 18px 0 8px 0; }
+  .audit-section p { font-size: 12.5px; color: var(--muted); line-height: 1.55; margin: 6px 0 12px 0; }
+  .audit-section p b, .audit-section li b { color: var(--text); }
+  .audit-section table {
+    width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 14px;
+  }
+  .audit-section th {
+    text-align: left; background: #20242e; color: var(--text); font-weight: 700;
+    padding: 6px 10px; border: 1px solid #2a3040;
+  }
+  .audit-section td {
+    color: var(--muted); padding: 6px 10px; border: 1px solid #2a3040; vertical-align: top;
+  }
+  .audit-section td b { color: var(--text); }
+  .audit-section ul { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin: 6px 0 12px 0; padding-left: 20px; }
+  .audit-instructions {
+    background: #20242e; border: 1px solid #ffd479; border-radius: 8px;
+    padding: 12px 16px; font-size: 12px; color: var(--text); margin-bottom: 20px; line-height: 1.55;
+  }
+</style>
+</head>
+<body>
+
+  <h1>Consolidated Single Board — 3 Strips, Integrated Power</h1>
+  <div class="subtitle">The gap between the near-edge cluster and the ESP32 is sized to what's needed for solder access and a modest keep-out margin — not padded further as a dedicated RF spacer. Antenna separation is handled at the enclosure level (shielding, placement, testing), not by board length.</div>
+
+  <div class="board-wrap">
+    <svg viewBox="0 0 900 1320" width="900" height="1320">
+
+      <defs>
+        <radialGradient id="solderGlint" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="45%" stop-color="var(--solder)"/>
+          <stop offset="100%" stop-color="var(--solder-shadow)"/>
+        </radialGradient>
+        <pattern id="perf" width="20" height="20" patternUnits="userSpaceOnUse">
+          <circle cx="10" cy="10" r="4" fill="var(--pad)" stroke="var(--pad-dark)" stroke-width="0.7"/>
+          <circle cx="10" cy="10" r="1.4" fill="var(--hole)"/>
+        </pattern>
+        <radialGradient id="quietGlow" cx="50%" cy="50%" r="70%">
+          <stop offset="0%" stop-color="var(--quiet)" stop-opacity="0.8"/>
+          <stop offset="100%" stop-color="var(--quiet)" stop-opacity="0.08"/>
+        </radialGradient>
+      </defs>
+
+      <!-- ================= FRONT PANEL — +5V-family networks only ================= -->
+      <text x="450" y="20" text-anchor="middle" font-size="14" font-weight="700" fill="var(--v5)">FRONT — +5V networks (LED bus, ESP-5V — kept separate from each other)</text>
+
+      <rect x="10" y="40" width="860" height="590" rx="8" fill="var(--board)" stroke="var(--board-edge)" stroke-width="2"/>
+      <rect x="24" y="54" width="832" height="562" fill="url(#perf)"/>
+
+      <!-- Battery + fused pigtail + splitter + regulators are entirely OFF-BOARD. The board only receives already-regulated -->
+      <!-- power through its own two XT30 ports, each with its own fuse right after the port. -->
+      <text x="150" y="12" text-anchor="middle" font-size="8" fill="var(--raw)" font-style="italic">Battery → 15A fused XT30 pigtail → splitter → UBEC / Small BEC</text>
+      <text x="150" y="21" text-anchor="middle" font-size="7.5" fill="var(--muted)" font-style="italic">all off-board — this fused pigtail is the only protection on the raw side</text>
+      <circle cx="35" cy="32" r="7" fill="#3a2c14" stroke="#c9a875" stroke-width="1.1"/>
+      <text x="35" y="35" text-anchor="middle" font-size="6" fill="#e8d9b8">15A</text>
+      <text x="46" y="35" text-anchor="start" font-size="6.5" fill="var(--muted)" font-style="italic">fused pigtail, off-board</text>
+
+      <!-- UBEC — external inline module, unfused raw input from the off-board splitter -->
+      <rect x="90" y="90" width="90" height="44" rx="5" fill="none" stroke="var(--v5)" stroke-width="1.6" stroke-dasharray="4,3"/>
+      <text x="135" y="106" text-anchor="middle" font-size="8.5" font-weight="700" fill="var(--v5)">Henge UBEC</text>
+      <text x="135" y="118" text-anchor="middle" font-size="7.5" fill="var(--muted)">external module</text>
+      <text x="135" y="129" text-anchor="middle" font-size="7.5" fill="var(--muted)">8A, 5V out — input has factory connector, cut+solder XT30</text>
+      <line x1="120" y1="90" x2="120" y2="75" stroke="var(--raw)" stroke-width="2" stroke-dasharray="3,2"/>
+      <circle cx="120" cy="90" r="3.5" fill="none" stroke="var(--muted)" stroke-width="1.2"/>
+      <text x="120" y="70" text-anchor="middle" font-size="6.5" fill="var(--muted)" font-style="italic">splitter (off-board)</text>
+
+      <!-- UBEC regulated output → bare wire, cut factory connector → KF301 screw terminal → 5A fuse → LED bus -->
+      <line x1="120" y1="134" x2="120" y2="142" stroke="var(--v5)" stroke-width="3.5"/>
+      <rect x="106" y="142" width="28" height="14" rx="2" fill="#3a6ea8" stroke="var(--v5)" stroke-width="1.2"/>
+      <circle cx="112" cy="149" r="2" fill="#1a1e28"/>
+      <circle cx="128" cy="149" r="2" fill="#1a1e28"/>
+      <text x="120" y="163" text-anchor="middle" font-size="6" fill="var(--v5)">KF301 screw</text>
+      <line x1="120" y1="156" x2="120" y2="163" stroke="var(--v5)" stroke-width="3.5"/>
+      <rect x="108" y="163" width="24" height="10" rx="2" fill="#3a2c14" stroke="#c9a875" stroke-width="1.1"/>
+      <text x="120" y="171" text-anchor="middle" font-size="6.5" fill="#e8d9b8">5A</text>
+      <line x1="120" y1="173" x2="120" y2="180" stroke="var(--v5)" stroke-width="3.5"/>
+      <text x="185" y="100" font-size="7" fill="var(--muted)" font-style="italic">dashed = off-board;</text>
+      <text x="185" y="110" font-size="7" fill="var(--muted)" font-style="italic">solid = real board wire.</text>
+      <text x="185" y="120" font-size="7" fill="var(--muted)" font-style="italic">Output: cut factory connector,</text>
+      <text x="185" y="130" font-size="7" fill="var(--muted)" font-style="italic">bare wire straight into screw terminal</text>
+
+      <!-- Small BEC for ESP32 — external inline module, unfused raw input from the off-board splitter -->
+      <rect x="220" y="90" width="90" height="44" rx="5" fill="none" stroke="var(--w-esp5)" stroke-width="1.6" stroke-dasharray="4,3"/>
+      <text x="265" y="106" text-anchor="middle" font-size="8.5" font-weight="700" fill="var(--w-esp5)">SoloGood BEC</text>
+      <text x="265" y="118" text-anchor="middle" font-size="7.5" fill="var(--muted)">external module</text>
+      <text x="265" y="129" text-anchor="middle" font-size="7.5" fill="var(--muted)">3A, fixed 5V out, no jumper — isolated</text>
+      <line x1="250" y1="90" x2="250" y2="75" stroke="var(--raw)" stroke-width="2" stroke-dasharray="3,2"/>
+      <circle cx="250" cy="90" r="3.5" fill="none" stroke="var(--muted)" stroke-width="1.2"/>
+      <text x="250" y="70" text-anchor="middle" font-size="6.5" fill="var(--muted)" font-style="italic">splitter (off-board)</text>
+
+      <!-- Small BEC regulated output → bare wire → KF301 screw terminal → 2A slow-blow fuse → ESP-5V lane -->
+      <line x1="250" y1="134" x2="250" y2="142" stroke="var(--w-esp5)" stroke-width="3.5"/>
+      <rect x="236" y="142" width="28" height="14" rx="2" fill="#3a6ea8" stroke="var(--w-esp5)" stroke-width="1.2"/>
+      <circle cx="242" cy="149" r="2" fill="#1a1e28"/>
+      <circle cx="258" cy="149" r="2" fill="#1a1e28"/>
+      <text x="250" y="163" text-anchor="middle" font-size="6" fill="var(--w-esp5)">KF301 screw</text>
+      <line x1="250" y1="156" x2="250" y2="163" stroke="var(--w-esp5)" stroke-width="3.5"/>
+      <rect x="238" y="163" width="24" height="10" rx="2" fill="#3a2c14" stroke="#c9a875" stroke-width="1.1"/>
+      <text x="250" y="171" text-anchor="middle" font-size="6.5" fill="#e8d9b8">2A T</text>
+      <line x1="250" y1="173" x2="250" y2="173" stroke="var(--w-esp5)" stroke-width="3.5"/>
+
+      <!-- ESP-5V lane: continues from after the fuse, jogs above the main bus, clear of it, out to the far edge -->
+      <path d="M 250 173 L 760 173 L 760 500" fill="none" stroke="var(--w-esp5)" stroke-width="3"/>
+      <text x="600" y="168" text-anchor="middle" font-size="8" fill="var(--w-esp5)" font-style="italic">ESP-5V — never tied to the main LED bus below</text>
+
+      <!-- Main +5V LED bus -->
+      <line x1="40" y1="180" x2="440" y2="180" stroke="var(--v5)" stroke-width="6" stroke-linecap="round"/>
+      <text x="450" y="184" font-size="10.5" fill="var(--v5)" font-weight="700">MAIN +5V BUS</text>
+      <circle cx="120" cy="180" r="5" fill="url(#solderGlint)"/>
+
+      <!-- 1000uF bulk capacitor, right at the LED bus inlet, just after the 5A fuse -->
+      <line x1="165" y1="180" x2="165" y2="196" stroke="var(--v5)" stroke-width="2"/>
+      <circle cx="165" cy="180" r="4" fill="url(#solderGlint)"/>
+      <circle cx="165" cy="203" r="9" fill="#2c2c2e" stroke="var(--v5)" stroke-width="1.3"/>
+      <line x1="161" y1="198" x2="169" y2="198" stroke="var(--v5)" stroke-width="1.2"/>
+      <line x1="165" y1="210" x2="165" y2="222" stroke="var(--gnd)" stroke-width="2"/>
+      <circle cx="165" cy="222" r="3.5" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="2,2"/>
+      <text x="180" y="206" font-size="7.5" fill="var(--muted)">1000µF bulk</text>
+      <text x="180" y="215" font-size="7" fill="var(--muted)" font-style="italic">GND leg on back</text>
+
+      <!-- Optional fan connector — 2-pin, taps LED+5V bus (not the isolated ESP rail). Not populated unless a fan is added. -->
+      <rect x="410" y="200" width="45" height="20" rx="4" fill="#2c2c2e" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="3,2"/>
+      <text x="432" y="196" text-anchor="middle" font-size="8" fill="var(--muted)" font-weight="700">FAN PORT</text>
+      <line x1="422" y1="200" x2="422" y2="180" stroke="var(--v5)" stroke-width="3"/>
+      <circle cx="422" cy="180" r="4" fill="url(#solderGlint)"/>
+      <circle cx="422" cy="200" r="3.5" fill="url(#solderGlint)"/>
+      <circle cx="443" cy="200" r="3.5" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="2,2"/>
+      <text x="432" y="230" text-anchor="middle" font-size="7" fill="var(--muted)" font-style="italic">P → LED+5V (front)</text>
+      <text x="432" y="239" text-anchor="middle" font-size="7" fill="var(--muted)" font-style="italic">G → GND (back)</text>
+
+      <!-- JST P taps -->
+      <g stroke="var(--v5)" stroke-width="4" stroke-linecap="round">
+        <line x1="65" y1="270" x2="65" y2="180"/>
+        <line x1="185" y1="270" x2="185" y2="180"/>
+        <line x1="305" y1="270" x2="305" y2="180"/>
+      </g>
+      <g fill="url(#solderGlint)">
+        <circle cx="65" cy="180" r="5"/><circle cx="65" cy="270" r="5"/>
+        <circle cx="185" cy="180" r="5"/><circle cx="185" cy="270" r="5"/>
+        <circle cx="305" cy="180" r="5"/><circle cx="305" cy="270" r="5"/>
+      </g>
+
+      <!-- JST housings + labels -->
+      <g font-size="10" font-weight="700" text-anchor="middle" fill="#3a2c14">
+        <text x="100" y="245">JST-1 → Strip 1</text>
+        <text x="220" y="245">JST-2 → Strip 2</text>
+        <text x="340" y="245">JST-3 → Strip 3</text>
+      </g>
+      <g fill="#2c2c2e" stroke="#111" stroke-width="1.4">
+        <rect x="45" y="255" width="90" height="24" rx="4"/>
+        <rect x="165" y="255" width="90" height="24" rx="4"/>
+        <rect x="285" y="255" width="90" height="24" rx="4"/>
+      </g>
+      <g stroke="#8a5a2c" stroke-width="1.2" stroke-dasharray="2,2" fill="none">
+        <circle cx="88" cy="267" r="5.5"/><circle cx="112" cy="267" r="5.5"/><circle cx="135" cy="267" r="5.5"/>
+        <circle cx="208" cy="267" r="5.5"/><circle cx="232" cy="267" r="5.5"/><circle cx="255" cy="267" r="5.5"/>
+        <circle cx="328" cy="267" r="5.5"/><circle cx="352" cy="267" r="5.5"/><circle cx="375" cy="267" r="5.5"/>
+      </g>
+
+      <!-- chip VCC via (real wire on this face) -->
+      <circle cx="400" cy="320" r="5" fill="none" stroke="var(--muted)" stroke-width="1.3"/>
+      <line x1="400" y1="180" x2="400" y2="320" stroke="var(--v5)" stroke-width="3.5"/>
+      <circle cx="400" cy="180" r="5" fill="url(#solderGlint)"/>
+      <text x="415" y="324" font-size="8" fill="var(--v5)" font-weight="700">chip VCC</text>
+
+      <!-- ESP32 footprint (dashed, far edge) with real ESP-5V wire — aligned to the same local y as the real body on the back panel -->
+      <rect x="500" y="490" width="260" height="80" rx="8" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3,3"/>
+      <text x="630" y="535" text-anchor="middle" font-size="11" fill="var(--muted)">ESP32 UWB (footprint)</text>
+      <circle cx="760" cy="500" r="5" fill="url(#solderGlint)"/>
+      <text x="740" y="494" text-anchor="end" font-size="8.5" fill="var(--w-esp5)" font-weight="700">5V IN</text>
+
+      <text x="450" y="410" text-anchor="middle" font-size="10" fill="#5a4a30" font-style="italic">
+        Dashed circles/rects = wired on the BACK face — nothing else routed here
+      </text>
+
+      <!-- ================= BACK PANEL — GND + signals + chip + ESP32 body ================= -->
+      <g transform="translate(0,660)">
+
+        <text x="450" y="0" text-anchor="middle" font-size="14" font-weight="700" fill="#c9ced8">BACK — GND + Data/Clock + chip + ESP32</text>
+        <text x="450" y="17" text-anchor="middle" font-size="10" fill="var(--muted)" font-style="italic">same left-right orientation as front, as if seen through the board</text>
+
+        <rect x="10" y="30" width="860" height="590" rx="8" fill="var(--board)" stroke="var(--board-edge)" stroke-width="2"/>
+        <rect x="24" y="44" width="832" height="562" fill="url(#perf)"/>
+
+        <!-- GND bus -->
+        <line x1="40" y1="70" x2="820" y2="70" stroke="var(--gnd)" stroke-width="6" stroke-linecap="round"/>
+        <text x="825" y="74" font-size="10.5" fill="#aab1c0" font-weight="700">GND BUS</text>
+
+        <!-- bulk cap GND leg, matching the front panel's +5V leg at the same local position -->
+        <circle cx="165" cy="222" r="3.5" fill="url(#solderGlint)"/>
+        <line x1="165" y1="222" x2="165" y2="70" stroke="var(--gnd)" stroke-width="2"/>
+        <circle cx="165" cy="70" r="4" fill="url(#solderGlint)"/>
+
+        <!-- Optional fan connector — GND pin, matching the front panel's + pin at the same local position -->
+        <rect x="410" y="200" width="45" height="20" rx="4" fill="#2c2c2e" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="3,2"/>
+        <circle cx="422" cy="200" r="3.5" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="2,2"/>
+        <line x1="443" y1="200" x2="443" y2="70" stroke="var(--gnd)" stroke-width="3"/>
+        <circle cx="443" cy="70" r="4" fill="url(#solderGlint)"/>
+        <circle cx="443" cy="200" r="3.5" fill="url(#solderGlint)"/>
+
+        <!-- UBEC branch: GND pin of the on-board KF301 screw terminal, matching the front panel's + pin at the same x -->
+        <line x1="120" y1="142" x2="120" y2="70" stroke="var(--gnd)" stroke-width="3"/>
+        <rect x="106" y="142" width="28" height="14" rx="2" fill="#3a6ea8" stroke="var(--gnd)" stroke-width="1.2"/>
+        <circle cx="112" cy="149" r="2" fill="#1a1e28"/>
+        <circle cx="128" cy="149" r="2" fill="#1a1e28"/>
+        <text x="120" y="163" text-anchor="middle" font-size="6" fill="#c9ced8">KF301 screw</text>
+        <circle cx="120" cy="70" r="4" fill="url(#solderGlint)"/>
+        <text x="120" y="173" text-anchor="middle" font-size="6.5" fill="var(--muted)" font-style="italic">GND, no fuse on return</text>
+
+        <!-- Small BEC branch: same treatment -->
+        <line x1="250" y1="142" x2="250" y2="70" stroke="var(--gnd)" stroke-width="3"/>
+        <rect x="236" y="142" width="28" height="14" rx="2" fill="#3a6ea8" stroke="var(--gnd)" stroke-width="1.2"/>
+        <circle cx="242" cy="149" r="2" fill="#1a1e28"/>
+        <circle cx="258" cy="149" r="2" fill="#1a1e28"/>
+        <text x="250" y="163" text-anchor="middle" font-size="6" fill="#c9ced8">KF301 screw</text>
+        <circle cx="250" cy="70" r="4" fill="url(#solderGlint)"/>
+        <text x="250" y="173" text-anchor="middle" font-size="6.5" fill="var(--muted)" font-style="italic">GND, no fuse on return</text>
+
+        <!-- JST G taps: straight up to GND bus, short and clean -->
+        <g stroke="var(--gnd)" stroke-width="4" stroke-linecap="round">
+          <line x1="88" y1="270" x2="88" y2="70"/>
+          <line x1="208" y1="270" x2="208" y2="70"/>
+          <line x1="328" y1="270" x2="328" y2="70"/>
+        </g>
+        <g fill="url(#solderGlint)">
+          <circle cx="88" cy="70" r="5"/><circle cx="88" cy="270" r="5"/>
+          <circle cx="208" cy="70" r="5"/><circle cx="208" cy="270" r="5"/>
+          <circle cx="328" cy="70" r="5"/><circle cx="328" cy="270" r="5"/>
+        </g>
+
+        <!-- JST pin labels -->
+        <g font-size="9.5" font-weight="700" text-anchor="middle">
+          <text x="65" y="300" fill="var(--v5)" opacity="0.5">P(front)</text>
+          <text x="88" y="300" fill="#c9ced8">G</text>
+          <text x="112" y="300" fill="var(--w-data)">D1</text>
+          <text x="135" y="300" fill="var(--w-clk)">C1</text>
+          <text x="185" y="300" fill="var(--v5)" opacity="0.5">P(front)</text>
+          <text x="208" y="300" fill="#c9ced8">G</text>
+          <text x="232" y="300" fill="var(--w-data)">D2</text>
+          <text x="255" y="300" fill="var(--w-clk)">C2</text>
+          <text x="305" y="300" fill="var(--v5)" opacity="0.5">P(front)</text>
+          <text x="328" y="300" fill="#c9ced8">G</text>
+          <text x="352" y="300" fill="var(--w-data)">D3</text>
+          <text x="375" y="300" fill="var(--w-clk)">C3</text>
+        </g>
+
+        <!-- D/C straight down from JST to chip B-outputs, with a 220R resistor on each, no fan needed since columns already align -->
+        <g stroke-width="4" stroke-linecap="round">
+          <line x1="112" y1="270" x2="112" y2="360" stroke="var(--w-data)"/>
+          <line x1="135" y1="270" x2="135" y2="360" stroke="var(--w-clk)"/>
+          <line x1="232" y1="270" x2="232" y2="360" stroke="var(--w-data)"/>
+          <line x1="255" y1="270" x2="255" y2="360" stroke="var(--w-clk)"/>
+          <line x1="352" y1="270" x2="352" y2="360" stroke="var(--w-data)"/>
+          <line x1="375" y1="270" x2="375" y2="360" stroke="var(--w-clk)"/>
+        </g>
+        <g stroke="#c9a875" stroke-width="1.1">
+          <rect x="101" y="311" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="124" y="311" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="221" y="311" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="244" y="311" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="341" y="311" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+          <rect x="364" y="311" width="22" height="8" rx="1.5" fill="#3a2c14"/>
+        </g>
+        <text x="450" y="335" text-anchor="middle" font-size="8" fill="var(--muted)" font-style="italic">220Ω on each line, right at the chip's output side</text>
+
+        <!-- Chip -->
+        <rect x="90" y="360" width="310" height="50" rx="6" fill="#20242e" stroke="#e8ecf4" stroke-width="1.5"/>
+        <circle cx="102" cy="372" r="3" fill="none" stroke="#e8ecf4" stroke-width="1"/>
+        <text x="245" y="382" text-anchor="middle" font-size="12" font-weight="700" fill="#e8ecf4">SN74HCT245</text>
+        <text x="245" y="398" text-anchor="middle" font-size="8.5" fill="var(--muted)">B-out (top, to JSTs) / A-in (bottom, to ESP32)</text>
+        <g fill="url(#solderGlint)">
+          <circle cx="112" cy="360" r="4"/><circle cx="135" cy="360" r="4"/>
+          <circle cx="232" cy="360" r="4"/><circle cx="255" cy="360" r="4"/>
+          <circle cx="352" cy="360" r="4"/><circle cx="375" cy="360" r="4"/>
+        </g>
+
+        <!-- chip GND, clear lane on the left -->
+        <circle cx="98" cy="410" r="4.5" fill="url(#solderGlint)"/>
+        <path d="M 98 410 L 20 410 L 20 70" fill="none" stroke="var(--gnd)" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="20" cy="70" r="5" fill="url(#solderGlint)"/>
+        <text x="98" y="424" text-anchor="middle" font-size="8" fill="#c9ced8" font-weight="700">GND</text>
+
+        <!-- chip VCC via marker + OE/DIR straps -->
+        <circle cx="400" cy="360" r="4" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="2,2"/>
+        <text x="400" y="353" text-anchor="middle" font-size="7.5" fill="var(--muted)">VCC (front)</text>
+        <circle cx="115" cy="410" r="4" fill="url(#solderGlint)"/>
+        <path d="M 115 410 L 115 420 L 98 420 L 98 414" fill="none" stroke="var(--gnd)" stroke-width="2.2"/>
+        <text x="115" y="432" text-anchor="middle" font-size="7.5" fill="var(--muted)">OE → GND</text>
+        <circle cx="130" cy="410" r="4" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="2,2"/>
+        <path d="M 130 410 L 130 420 L 400 420 L 400 364" fill="none" stroke="var(--v5)" stroke-width="2" stroke-dasharray="3,2"/>
+        <text x="130" y="432" text-anchor="middle" font-size="7.5" fill="var(--muted)">DIR → VCC (A→B)</text>
+        <circle cx="200" cy="425" r="6" fill="#20242e" stroke="var(--v5)" stroke-width="1.2"/>
+        <line x1="195" y1="420" x2="205" y2="420" stroke="var(--v5)" stroke-width="1.1"/>
+        <text x="215" y="428" font-size="7.5" fill="var(--muted)">0.1µF decoupling</text>
+        <line x1="200" y1="410" x2="200" y2="419" stroke="var(--v5)" stroke-width="2"/>
+        <line x1="200" y1="431" x2="200" y2="440" stroke="var(--gnd)" stroke-width="2"/>
+        <line x1="200" y1="440" x2="98" y2="440" stroke="var(--gnd)" stroke-width="2"/>
+
+        <!-- A-inputs, long run out to ESP32 at the far edge, own staggered lanes, clear of GND bus above -->
+        <g fill="url(#solderGlint)">
+          <circle cx="112" cy="410" r="4"/><circle cx="135" cy="410" r="4"/>
+          <circle cx="232" cy="410" r="4"/><circle cx="255" cy="410" r="4"/>
+          <circle cx="352" cy="410" r="4"/><circle cx="375" cy="410" r="4"/>
+        </g>
+        <g stroke-width="3.5" fill="none">
+          <path d="M 112 410 L 112 450 L 530 450 L 530 490" stroke="var(--w-data)"/>
+          <path d="M 135 410 L 135 458 L 550 458 L 550 490" stroke="var(--w-clk)"/>
+          <path d="M 232 410 L 232 466 L 570 466 L 570 490" stroke="var(--w-data)"/>
+          <path d="M 255 410 L 255 474 L 590 474 L 590 490" stroke="var(--w-clk)"/>
+          <path d="M 352 410 L 352 482 L 610 482 L 610 490" stroke="var(--w-data)"/>
+          <path d="M 375 410 L 375 490 L 630 490 L 630 490" stroke="var(--w-clk)"/>
+        </g>
+        <text x="450" y="470" text-anchor="middle" font-size="9" fill="var(--muted)" font-style="italic">
+          Low-current control lines only — the short remaining gap keeps them out of the antenna's near field
+        </text>
+
+        <!-- ESP32 body -->
+        <rect x="500" y="490" width="260" height="80" rx="8" fill="#20242e" stroke="var(--w-esp5)" stroke-width="1.6"/>
+        <text x="630" y="520" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text)">ESP32 UWB Module</text>
+        <text x="630" y="538" text-anchor="middle" font-size="9" fill="var(--muted)">connector end (near data)</text>
+        <g fill="url(#solderGlint)">
+          <circle cx="530" cy="490" r="4"/><circle cx="550" cy="490" r="4"/><circle cx="570" cy="490" r="4"/>
+          <circle cx="590" cy="490" r="4"/><circle cx="610" cy="490" r="4"/><circle cx="630" cy="490" r="4"/>
+        </g>
+        <text x="630" y="558" text-anchor="middle" font-size="9" fill="var(--muted)">GPIO: D1 C1 D2 C2 D3 C3</text>
+
+        <!-- ESP32 GND, clear lane just past the module -->
+        <circle cx="760" cy="560" r="5" fill="url(#solderGlint)"/>
+        <path d="M 760 560 L 800 560 L 800 70" fill="none" stroke="var(--gnd)" stroke-width="3.5"/>
+        <circle cx="800" cy="70" r="5" fill="url(#solderGlint)"/>
+        <text x="760" y="552" text-anchor="middle" font-size="8" fill="#c9ced8" font-weight="700">GND</text>
+
+        <!-- ESP-5V via marker (real wire on front) -->
+        <circle cx="760" cy="500" r="4" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="2,2"/>
+        <text x="740" y="497" text-anchor="end" font-size="7.5" fill="var(--muted)">5V IN (front)</text>
+
+        <!-- Antenna, far edge — separation is provided by the keep-out margin itself -->
+        <circle cx="820" cy="530" r="50" fill="url(#quietGlow)" stroke="var(--quiet)" stroke-width="1.4" stroke-dasharray="4,3"/>
+        <circle cx="820" cy="530" r="4" fill="var(--quiet)"/>
+        <text x="820" y="600" text-anchor="middle" font-size="9" fill="var(--quiet)" font-style="italic">antenna end — keep-out zone</text>
+
+      </g>
+
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="swatch" style="background:var(--v5)"></div>Main +5V (LED bus)</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-esp5)"></div>ESP-5V (isolated, own BEC)</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--gnd)"></div>Common GND</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-data)"></div>Data</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--w-clk)"></div>Clock</div>
+  </div>
+
+  <div class="callout">
+    <b>Use a 20-pin DIP socket for the SN74HCT245, not direct solder:</b> solder the socket to the board and test the
+    surrounding circuit first (VCC, GND, OE/DIR straps) before inserting the chip. This keeps the chip itself out of the
+    way of iron heat during the rest of the build, and lets it be swapped later without desoldering if a data line is
+    ever damaged.
+  </div>
+
+  <div class="callout">
+    <b>Bulk capacitor placement:</b> the 1000µF bulk cap sits directly on the LED+5V bus, right after the on-board 5A fuse
+    — this is the node that benefits most from it, since it's what absorbs current transients as LED brightness/patterns
+    change, right where the UBEC's output first reaches the board over stranded wire. The ESP-5V rail doesn't get its own
+    separate bulk cap here — the ESP32 module typically carries its own onboard bulk capacitance already.
+  </div>
+
+  <div class="callout">
+    <b>Bench-testing caution — power both rails together, not independently:</b> LED+5V and ESP-5V share a common GND but
+    are otherwise electrically separate. In normal operation both come off the same battery/splitter and rise together, so
+    this isn't a concern during real use. But if you ever power just the ESP-5V rail alone on the bench (e.g. via USB,
+    while the LED+5V rail is unpowered), the ESP32 could drive the level shifter's A-inputs while the chip has no VCC —
+    forward-biasing its input clamp diodes. Low risk in practice, but worth keeping both rails powered together during
+    testing rather than probing one in isolation.
+  </div>
+
+  <div class="callout">
+    <b>Fan port — required on every board, connecting a fan to it is optional:</b> this 2-pin JST connector gets soldered
+    onto the board as a standard part of the build, every time — it's not a "skip if unused" component. What's optional is
+    whether a fan actually gets plugged into it. It taps the <b>LED+5V bus</b> (not the isolated ESP-5V rail — fan motor
+    noise shouldn't be introduced onto the ESP32's clean supply), plus GND. Building it in now means a fan can be added
+    later without reopening the board, if handheld use and thermal testing show one is needed — the connector costs
+    nothing to leave unplugged, but it's much cheaper to include now than to retrofit after the enclosure is assembled.
+    A typical 30mm 5V fan draws ~100-200mA, well within the LED bus's headroom (rated 8A, ~3.75A worst-case load already
+    accounted for).
+  </div>
+
+  <div class="callout">
+    <b>Three fuses total, each protecting a different segment:</b> a <b>15A fused XT30 pigtail</b> sits right at the battery's
+    main lead, off-board, before the splitter — this is the only protection on the raw side, and it's a simple inline part
+    (fuse holder built into the pigtail), not a separate board. From there, the splitter and both regulators (UBEC, Small
+    BEC) remain unfused themselves, relying on that one upstream fuse plus their own input protection. Each regulator's
+    <b>already-regulated</b> 5V output then comes back onto the board through its own dedicated <b>KF301 screw terminal</b>
+    (bare wire, no connector needed — the regulator's factory output connector is simply cut off), followed by a second
+    fuse sized to that branch's actual load: <b>5A on the UBEC branch</b> (~3.75A worst case) and <b>2A slow-blow (T2AL250V)
+    on the Small BEC branch</b> (~1-2A worst case — slow-blow chosen specifically to ride through WiFi/UWB transmit current
+    spikes without nuisance-tripping). Every segment of the power path — raw feed, LED bus, ESP32 rail — has a fuse
+    protecting it.
+  </div>
+
+  <div class="callout">
+    <b>Wire gauge — 18AWG only where current is combined, 22AWG everywhere else:</b> <b>18AWG stranded</b> is used only on
+    segments carrying combined/bus-level current — the raw feed (battery → fused pigtail → splitter, ~5-6A combined) and
+    the on-board LED+5V and GND buses (~3.75A). <b>22AWG stranded</b> covers every individual branch after that: each JST
+    strip's power leads (~1.25A each), the ESP32/Small BEC branch (~1-2A), the fan port, and all Data/Clock lines (current
+    is negligible there — 22AWG is chosen for physical durability and consistency with the rest of the branch wiring, not
+    current capacity). Stranded (not solid core) throughout, given this is a handheld device — solid core work-hardens and
+    cracks under repeated flexing in a way stranded doesn't.
+  </div>
+  <div class="callout">
+    <b>UBEC and Small BEC are external modules, not board-mounted parts:</b> the parts used here (the Henge 8A UBEC, the
+    SoloGood 3A fixed-5V BEC) are self-contained modules on their own short wire pigtail, the same category of thing as
+    the fuse holder. <b>No raw voltage touches the board at all</b> — the battery, splitter, and both modules' unregulated
+    input side are entirely off-board. The board only ever sees <b>already-regulated</b> 5V, arriving through its own
+    <b>KF301 screw terminal</b> on each branch — chosen over a connector here specifically because it eliminates the need
+    to solder anything onto the regulator's output wire at all; the bare wire goes straight into the terminal and gets
+    clamped down with a screw.
+  </div>
+
+  <div class="callout">
+    <b>Single board, single UBEC, single level shifter:</b> one 8A UBEC comfortably covers the ~3.75A worst-case LED load
+    with real margin, and one level shifter handles all three strips — there's no need to split the circuit across
+    multiple regulators or chips at this scale. The ESP32 still gets its <b>own separate small BEC</b>, isolating it from
+    LED-side switching noise regardless of how many regulators the LED side uses. Antenna separation is achieved through
+    <b>zone placement</b> on the single board: JSTs, chip, and all the power circuitry cluster at the near edge; the ESP32
+    and its antenna sit at the far edge, with only low-current control wires (Data/Clock, ESP-5V, ESP GND) making the
+    short trip across.
+  </div>
+
+  <div class="callout">
+    <b>The near/far-edge gap is a deliberate tradeoff, not a spacer:</b> the gap between the near-edge cluster and the
+    ESP32 is close to the minimum needed for solder access and wire dressing, sized for a compact board rather than
+    padded out as RF insurance. This means near-field coupling from the level shifter and UBEC has less distance to fall
+    off before reaching the antenna, so the other mitigations carry more of that load: a small grounded shield if the
+    enclosure allows it, the resistor-damped signal lines, and testing UWB ranging accuracy at the real build spacing
+    before final assembly.
+  </div>
+
+  <div class="note">
+    Front/back split wiring and P-G-D-C pin ordering keep every Data/Clock line crossing-free, and the single board
+    covers the full 3-strip, dual-power-rail, fan-ready design described above.
+  </div>
+
+  <div class="audit-section">
+
+    <div class="audit-instructions">
+      <b>For anyone auditing this design:</b> this section is a complete, self-contained transcription of the electrical
+      design — wiring, power sizing, and parts list — kept in the same file as the schematic so the two can never drift
+      out of sync. Please flag anything found with high confidence as a <b>BUG</b>, and anything uncertain or worth
+      confirming as a <b>QUESTION</b>. Check this section against the SVG schematic above if you want to cross-reference
+      the source drawing directly.
+    </div>
+
+    <h2>1. System Summary</h2>
+    <ul>
+      <li>1 board, 3 addressable LED strips (Adafruit DotStar/SK9822), 1 level shifter, 1 ESP32 (WiFi + UWB), 1 battery, 2 independent voltage regulators.</li>
+      <li>Two 5V rails, deliberately never electrically tied to each other: <b>LED bus</b> (strips + level shifter) and <b>ESP-5V</b> (ESP32 only, isolated).</li>
+      <li>Single shared ground net across the whole board.</li>
+      <li>All raw-voltage components (battery, fuse, splitter, both regulators) are off-board. The board only ever receives already-regulated 5V, through two on-board <b>KF301 screw terminals</b>.</li>
+    </ul>
+
+    <h2>2. Complete Net List</h2>
+
+    <h3>2.1 Off-board power chain (raw, ~7.4V nominal 2S LiPo) — NOT on the main board</h3>
+    <table>
+      <tr><th>Segment</th><th>Path</th></tr>
+      <tr><td>Battery main lead</td><td>Battery (+) → <b>15A fused XT30 pigtail</b> (fuse holder built into the pigtail) → XT30 splitter (1 female in, 2 male out)</td></tr>
+      <tr><td>Splitter branch A</td><td>Splitter output → Henge 8A UBEC raw input (factory connector cut, XT30 female soldered on to mate with splitter)</td></tr>
+      <tr><td>Splitter branch B</td><td>Splitter output → SoloGood 3A BEC raw input (same treatment)</td></tr>
+      <tr><td>Return</td><td>Battery (−) → splitter → both modules' GND reference (off-board)</td></tr>
+    </table>
+    <p>The 15A fused pigtail is the only protection on the entire off-board segment — the splitter and both regulators have no additional fuse of their own, relying on this one upstream fuse plus their own input protection.</p>
+
+    <h3>2.2 On-board power nets (regulated only)</h3>
+    <table>
+      <tr><th>Net</th><th>Source</th><th>Path on board</th><th>Notes</th></tr>
+      <tr><td><b>LED+5V</b></td><td>Henge UBEC output (5V, rated 8A)</td><td>Bare wire (factory connector cut) → <b>KF301 screw terminal</b> → 5A fuse → 1000µF bulk cap (to GND) → Main +5V bus (front) → P-pin of JST-1/2/3 → chip VCC → fan port (+)</td><td>Powers strips, level shifter, optional fan</td></tr>
+      <tr><td><b>ESP-5V</b></td><td>SoloGood BEC output (5V, rated 3A, fixed — no jumper)</td><td>Bare wire → <b>KF301 screw terminal</b> → 2A slow-blow (T2AL250V) fuse → dedicated lane (front) → ESP32 5V-IN</td><td><b>Never</b> tied to LED+5V — isolated rail, own regulator, own fuse</td></tr>
+      <tr><td><b>GND</b></td><td>Both KF301 terminals' GND pins</td><td>Common GND bus (back)</td><td>No fuse on any return path — only + lines are fused</td></tr>
+    </table>
+    <p><b>Why screw terminals instead of a connector:</b> both regulators' factory output connectors are simply cut off — bare wire goes straight into the terminal and is clamped with a screw. No solder joint needed on the output side at all, which was a deliberate goal (reduce hard-soldered components).</p>
+
+    <h3>2.3 GND bus — everything that ties to it</h3>
+    <ul>
+      <li>Both KF301 screw terminals' GND pins</li>
+      <li>JST-1, JST-2, JST-3 — G pin of each</li>
+      <li>Level shifter chip — GND pin</li>
+      <li>ESP32 module — GND pin</li>
+    </ul>
+
+    <h3>2.4 JST connector pinout (P-G-D-C order, all 3 identical)</h3>
+    <table>
+      <tr><th>Connector</th><th>P (front, +5V)</th><th>G (back, GND)</th><th>D (back, data)</th><th>C (back, clock)</th></tr>
+      <tr><td>JST-1 → Strip 1</td><td>LED+5V</td><td>GND</td><td>220Ω → chip B-out 1</td><td>220Ω → chip B-out 2</td></tr>
+      <tr><td>JST-2 → Strip 2</td><td>LED+5V</td><td>GND</td><td>220Ω → chip B-out 3</td><td>220Ω → chip B-out 4</td></tr>
+      <tr><td>JST-3 → Strip 3</td><td>LED+5V</td><td>GND</td><td>220Ω → chip B-out 5</td><td>220Ω → chip B-out 6</td></tr>
+    </table>
+
+    <h3>2.5 Level shifter (SN74HCT245, octal bus transceiver, socketed)</h3>
+    <table>
+      <tr><th>Pin</th><th>Net</th><th>Notes</th></tr>
+      <tr><td>VCC</td><td>LED+5V (front via)</td><td>Same rail as strips, not the isolated ESP rail</td></tr>
+      <tr><td>GND</td><td>GND</td><td>Dedicated clear-lane trace</td></tr>
+      <tr><td>OE</td><td>GND (local strap)</td><td>Tied low — permanently enabled</td></tr>
+      <tr><td>DIR</td><td>LED+5V (local strap)</td><td>Tied high — forces A→B (A=ESP32 side, B=JST side)</td></tr>
+      <tr><td>B1–B6 (outputs)</td><td>220Ω → respective JST D/C pin</td><td>Resistor on output side only</td></tr>
+      <tr><td>A1–A6 (inputs)</td><td>Long lane → respective ESP32 GPIO</td><td>No resistor on input side</td></tr>
+      <tr><td>Decoupling</td><td>0.1µF ceramic, VCC↔GND</td><td>Immediately adjacent to chip</td></tr>
+      <tr><td>Mounting</td><td>—</td><td>20-pin DIP socket — solder socket, test circuit, insert chip last</td></tr>
+    </table>
+
+    <h3>2.6 Signal channel mapping</h3>
+    <table>
+      <tr><th>Chip pin</th><th>JST signal</th><th>ESP32 GPIO label</th></tr>
+      <tr><td>A1/B1</td><td>JST-1 Data</td><td>D1</td></tr>
+      <tr><td>A2/B2</td><td>JST-1 Clock</td><td>C1</td></tr>
+      <tr><td>A3/B3</td><td>JST-2 Data</td><td>D2</td></tr>
+      <tr><td>A4/B4</td><td>JST-2 Clock</td><td>C2</td></tr>
+      <tr><td>A5/B5</td><td>JST-3 Data</td><td>D3</td></tr>
+      <tr><td>A6/B6</td><td>JST-3 Clock</td><td>C3</td></tr>
+    </table>
+
+    <h3>2.7 ESP32 module</h3>
+    <table>
+      <tr><th>Pin</th><th>Net</th></tr>
+      <tr><td>5V IN</td><td>ESP-5V (isolated rail, arrives via KF301 + 2A slow-blow fuse)</td></tr>
+      <tr><td>GND</td><td>GND (clear-lane trace)</td></tr>
+      <tr><td>GPIO D1/C1/D2/C2/D3/C3</td><td>Chip A-inputs, see 2.6</td></tr>
+    </table>
+
+    <h2>3. Power Sizing</h2>
+
+    <h3>3.1 Current budget</h3>
+    <table>
+      <tr><th>Load</th><th>Calculation</th><th>Result</th></tr>
+      <tr><td>Per LED strip (worst case)</td><td>26 LEDs × 60mA × 0.8 (SW brightness cap)</td><td>~1.25A</td></tr>
+      <tr><td>All 3 strips combined</td><td>3 × 1.25A</td><td><b>~3.75A</b></td></tr>
+      <tr><td>ESP32 (WiFi/UWB burst)</td><td>—</td><td><b>~1-2A</b></td></tr>
+      <tr><td>Combined raw feed (before split)</td><td>3.75A + 1-2A</td><td><b>~5-6A</b></td></tr>
+      <tr><td>Realistic average (~30% duty)</td><td>—</td><td><b>~6.6W total</b></td></tr>
+    </table>
+
+    <h3>3.2 Regulator sizing</h3>
+    <table>
+      <tr><th>Regulator</th><th>Rated output</th><th>Actual load</th><th>Margin</th></tr>
+      <tr><td>Henge UBEC (LED bus)</td><td>8A continuous</td><td>~3.75A worst case</td><td>~2.1x</td></tr>
+      <tr><td>SoloGood BEC (ESP32)</td><td>3A continuous, fixed 5V</td><td>~1-2A worst case</td><td>1.5-3x</td></tr>
+    </table>
+
+    <h3>3.3 Fuse sizing</h3>
+    <table>
+      <tr><th>Fuse</th><th>Location</th><th>Rating</th><th>Protects</th></tr>
+      <tr><td>Battery pigtail fuse</td><td>Off-board, battery main lead</td><td>15A</td><td>Combined raw feed — short-circuit protection only; branch fuses handle overload</td></tr>
+      <tr><td>UBEC branch fuse</td><td>On-board, after KF301</td><td>5A</td><td>Everything downstream of the LED bus (~3.75A load, ~1.3x margin)</td></tr>
+      <tr><td>Small BEC branch fuse</td><td>On-board, after KF301</td><td>2A, slow-blow (T2AL250V)</td><td>Everything downstream of ESP-5V (~1-2A load — slow-blow chosen to ride through WiFi/UWB transmit spikes without nuisance-tripping)</td></tr>
+    </table>
+
+    <h3>3.4 Wire gauge</h3>
+    <table>
+      <tr><th>Segment</th><th>Current</th><th>Gauge</th></tr>
+      <tr><td>Battery → fused pigtail → splitter → regulators (raw, off-board)</td><td>~5-6A combined</td><td>18AWG stranded</td></tr>
+      <tr><td>On-board LED+5V bus, GND bus</td><td>~3.75A</td><td>18AWG stranded</td></tr>
+      <tr><td>Per-JST branch wiring, ESP-5V lane, fan port, Data/Clock</td><td>~1.25A or signal-only</td><td>22AWG stranded</td></tr>
+    </table>
+    <p>18AWG only where current is <b>combined</b> from multiple sources; 22AWG for every individual branch after that split, power or signal. Stranded (not solid core) throughout — this is a handheld device, and solid core work-hardens and cracks under repeated flexing in a way stranded doesn't.</p>
+
+    <h3>3.5 Battery</h3>
+    <table>
+      <tr><th>Spec</th><th>Value</th></tr>
+      <tr><td>Chemistry/config</td><td>2S LiPo</td></tr>
+      <tr><td>Nominal voltage</td><td>7.4V</td></tr>
+      <tr><td>Capacity</td><td>2000mAh</td></tr>
+      <tr><td>Discharge rating</td><td>35C</td></tr>
+      <tr><td>Connector</td><td>XT30 (discharge, via fused pigtail), separate XH-3P (balance/charge — verify this pack actually exposes one, see open items)</td></tr>
+    </table>
+
+    <h2>4. Parts List (this hemisphere)</h2>
+    <table>
+      <tr><th>Part</th><th>Role</th><th>Key spec</th></tr>
+      <tr><td>Double-sided, plated-through-hole protoboard, 12×18cm</td><td>Main board</td><td>Required for front/back split wiring technique</td></tr>
+      <tr><td>SN74HCT245, DIP-20</td><td>Level shifter</td><td>Octal transceiver, TTL-compatible inputs</td></tr>
+      <tr><td>20-pin DIP IC socket</td><td>Protects chip during build, swap without desoldering</td><td>Solder socket first, insert chip last</td></tr>
+      <tr><td>Female stacking headers, extra tall</td><td>ESP32 mount</td><td>Raises ESP32 for antenna clearance</td></tr>
+      <tr><td>Male breakaway header pins</td><td>General mounting</td><td>Pairs with stacking headers</td></tr>
+      <tr><td>2S LiPo, 2000mAh, 35C, XT30</td><td>Battery</td><td>See 3.5</td></tr>
+      <tr><td>XT30 pigtail, pre-fitted 15A fuse, 14AWG</td><td>Battery-end fuse</td><td>See 3.3</td></tr>
+      <tr><td>XT30 "1 Female to 2 Male" splitter</td><td>Splits battery feed</td><td>Off-board, between fused pigtail and both regulators</td></tr>
+      <tr><td>Henge UBEC, 8A, 7-25.5V in, 2-6S</td><td>LED bus regulator</td><td>See 3.2. Input has factory connector — cut, solder female XT30</td></tr>
+      <tr><td>SoloGood BEC, 3A, 5.5-26V in, fixed 5V</td><td>ESP32 rail regulator</td><td>See 3.2. No jumper — output is 2 bare wires</td></tr>
+      <tr><td>2× KF301-2P screw terminal, 5.08mm, 16A</td><td>On-board power entry, both branches</td><td>Accepts bare wire directly — no connector needed</td></tr>
+      <tr><td>2× inline fuse holders (5A blade + 2A slow-blow 5x20mm glass, screw-type)</td><td>On-board branch fuses</td><td>See 3.3</td></tr>
+      <tr><td>XT30 connectors, bare solder-cup, M+F</td><td>Splitter-to-regulator adapters, general use</td><td>Rated well above actual load</td></tr>
+      <tr><td>JST-SM 4-pin, 20AWG, pre-wired (SK9822-compatible)</td><td>Strip connectors</td><td>Female end mates with strip's factory connector</td></tr>
+      <tr><td>2-pin JST-PH, pre-wired</td><td>Fan port</td><td>Always populated; connecting a fan is optional</td></tr>
+      <tr><td>18AWG stranded silicone wire</td><td>Combined-current runs</td><td>See 3.4</td></tr>
+      <tr><td>22AWG stranded silicone wire</td><td>Branch/signal wiring</td><td>See 3.4</td></tr>
+      <tr><td>Electrolytic capacitor, 1000µF, 16V+</td><td>Bulk cap, LED bus inlet</td><td>See 2.2</td></tr>
+      <tr><td>Ceramic capacitor, 0.1µF</td><td>Decoupling cap at chip</td><td>See 2.5</td></tr>
+      <tr><td>220Ω resistors ×6 (leaded)</td><td>Data/Clock damping</td><td>See 2.4, 2.5</td></tr>
+    </table>
+
+    <h2>5. Known Open Items</h2>
+    <ul>
+      <li>Exact antenna location/keep-out on the physical ESP32 module not yet confirmed against the 10mm datasheet spec</li>
+      <li>Whether the ESP32 board has a usable 5V/VIN pin (vs. USB-only power) not yet confirmed</li>
+      <li>UWB ranging accuracy and WiFi signal quality at real build spacing not yet tested</li>
+      <li>Strip wire-to-pin color mapping not yet confirmed against physical strips</li>
+      <li>Measure actual ESP32 peak current before finalizing the 2A fuse — if real peak draw is closer to 0.5-0.7A, consider a 1A fuse for tighter protection</li>
+      <li>Confirm the battery's balance/charge connector configuration directly against the product listing — USB-integrated-charging packs sometimes don't expose a true external XH-3P balance lead</li>
+      <li>Confirm wire fit in XT30 solder cups where 18AWG is used (rated for it, but worth a physical check on the first joint)</li>
+    </ul>
+
+  </div>
+
+</body>
+</html>
