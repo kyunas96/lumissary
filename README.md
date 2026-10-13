@@ -16,7 +16,7 @@ This document covers the concept and the full technical design as of the end of 
 
 ## 1. The Idea
 
-This project comes straight from **Iain McGilchrist's _The Master and His Emissary_**. While I was reading it, the book's argument about the two hemispheres of the brain kept turning into a physical image of this build.
+This project comes straight from **Iain McGilchrist's [_The Master and His Emissary_](https://channelmcgilchrist.com/master-and-his-emissary/)**. While I was reading it, the book's argument about the two hemispheres of the brain kept turning into a physical image of this build.
 
 McGilchrist describes the left hemisphere as narrow and analytical, breaking the world into details. He describes the right as broad and integrative, seeing things whole and in relation. Lumissary builds that difference into both the hardware and the behavior of each hemisphere:
 
