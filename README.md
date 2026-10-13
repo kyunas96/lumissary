@@ -1,4 +1,4 @@
-# LED Brain Hemisphere — Project README
+# Lumissary — *The Master and His Emitter*
 
 A 3D-printed hemisphere of a human brain, interior-lit by addressable LED strips, with onboard WiFi + UWB positioning via an ESP32 module. Two hemispheres are built as a pair: they communicate with each other over WiFi and use UWB ranging to measure the live distance between them, driving a Kuramoto-style coupled-oscillator model that synchronizes their LED firing patterns — the closer the two hemispheres are to each other, the more tightly their pulses lock in phase; the farther apart, the more phase drift appears between them. This document summarizes the final design as of the end of the build-planning phase.
 
